@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -21,107 +21,85 @@ import {
   Hash,
   Plus
 } from "lucide-react";
+import { api } from "../lib/api";
+
+interface TagPost {
+  id: number;
+  title: string;
+  author: {
+    name: string;
+    username: string;
+    avatar: string;
+  };
+  timestamp: string;
+  stats: {
+    views: number;
+    likes: number;
+    comments: number;
+  };
+}
+
+interface Tag {
+  name: string;
+  postCount: number;
+  followerCount: number;
+  trendingScore: number;
+  change: string;
+  description: string;
+  color: string;
+  isFollowing: boolean;
+  recentPosts?: TagPost[];
+}
 
 export function TagsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("trending");
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const tags = [
-    {
-      name: "React",
-      description: "React 라이브러리와 관련된 모든 것",
-      postCount: 156,
-      followerCount: 2340,
-      isFollowing: true,
-      trendingScore: 95,
-      change: "+12%",
-      color: "bg-blue-100 text-blue-800",
-      recentPosts: [
-        {
-          id: "1",
-          title: "React 18의 새로운 기능들과 Concurrent Features 완벽 가이드",
-          author: { name: "김지수", username: "jisu_dev", avatar: "" },
-          stats: { likes: 127, comments: 23, views: 892 },
-          timestamp: "2시간 전"
-        },
-        {
-          id: "2", 
-          title: "React Hooks 패턴 모음집",
-          author: { name: "이민호", username: "minho_ts", avatar: "" },
-          stats: { likes: 89, comments: 15, views: 567 },
-          timestamp: "4시간 전"
+  // 태그 데이터 로드
+  useEffect(() => {
+    const fetchTags = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.getTags(searchTerm);
+        if (response.data.success) {
+          const tagsData = response.data.data;
+          
+          // 각 태그의 최근 게시물 로드 (상위 5개만)
+          const tagsWithPosts = await Promise.all(
+            tagsData.slice(0, 10).map(async (tag: Tag) => {
+              try {
+                const postsResponse = await api.getTagPosts(tag.name, 3);
+                return {
+                  ...tag,
+                  recentPosts: postsResponse.data.success ? postsResponse.data.data : []
+                };
+              } catch (error) {
+                console.error(`태그 ${tag.name} 게시물 로드 실패:`, error);
+                return {
+                  ...tag,
+                  recentPosts: []
+                };
+              }
+            })
+          );
+
+          setTags(tagsWithPosts);
         }
-      ]
-    },
-    {
-      name: "TypeScript",
-      description: "TypeScript 언어와 타입 시스템에 대한 모든 것",
-      postCount: 89,
-      followerCount: 1890,
-      isFollowing: false,
-      trendingScore: 87,
-      change: "+8%",
-      color: "bg-purple-100 text-purple-800",
-      recentPosts: [
-        {
-          id: "3",
-          title: "TypeScript 고급 타입 시스템 마스터하기",
-          author: { name: "박서연", username: "seoyeon_next", avatar: "" },
-          stats: { likes: 156, comments: 31, views: 1024 },
-          timestamp: "6시간 전"
-        }
-      ]
-    },
-    {
-      name: "Next.js",
-      description: "Next.js 프레임워크와 관련된 모든 것",
-      postCount: 67,
-      followerCount: 1567,
-      isFollowing: true,
-      trendingScore: 92,
-      change: "+15%",
-      color: "bg-green-100 text-green-800",
-      recentPosts: [
-        {
-          id: "4",
-          title: "Next.js 13 App Router 완전 정복",
-          author: { name: "최현우", username: "hyunwoo_dev", avatar: "" },
-          stats: { likes: 234, comments: 45, views: 1567 },
-          timestamp: "1일 전"
-        }
-      ]
-    },
-    {
-      name: "UI/UX Design",
-      description: "사용자 인터페이스와 사용자 경험 디자인",
-      postCount: 45,
-      followerCount: 1234,
-      isFollowing: false,
-      trendingScore: 78,
-      change: "+5%",
-      color: "bg-pink-100 text-pink-800",
-      recentPosts: []
-    },
-    {
-      name: "Korean Web Dev",
-      description: "한국의 웹 개발 커뮤니티와 관련된 모든 것",
-      postCount: 23,
-      followerCount: 987,
-      isFollowing: false,
-      trendingScore: 65,
-      change: "+20%",
-      color: "bg-orange-100 text-orange-800",
-      recentPosts: [
-        {
-          id: "5",
-          title: "한국 웹 개발자 커뮤니티 가이드 2024",
-          author: { name: "김지수", username: "jisu_dev", avatar: "" },
-          stats: { likes: 89, comments: 12, views: 456 },
-          timestamp: "2일 전"
-        }
-      ]
-    }
-  ];
+      } catch (error) {
+        console.error('태그 로드 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      fetchTags();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
 
   const filteredTags = tags.filter(tag => {
     const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,7 +176,24 @@ export function TagsPage() {
             </TabsList>
 
             <TabsContent value={activeTab} className="space-y-4 mt-6">
-              {filteredTags.map((tag) => (
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                  <p className="text-muted-foreground mt-4">태그를 불러오는 중...</p>
+                </div>
+              ) : filteredTags.length === 0 ? (
+                <div className="text-center py-12">
+                  <Hash className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">태그를 찾을 수 없습니다.</p>
+                  {searchTerm && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      검색어를 변경하거나 필터를 조정해보세요.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {filteredTags.map((tag) => (
                 <Card key={tag.name} className="hover:shadow-md transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -249,7 +244,7 @@ export function TagsPage() {
                     </div>
                   </CardHeader>
                   
-                  {tag.recentPosts.length > 0 && (
+                  {tag.recentPosts && tag.recentPosts.length > 0 && (
                     <CardContent>
                       <h4 className="font-medium mb-3">최근 게시물</h4>
                       <div className="space-y-3">
@@ -291,6 +286,8 @@ export function TagsPage() {
                   )}
                 </Card>
               ))}
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </div>

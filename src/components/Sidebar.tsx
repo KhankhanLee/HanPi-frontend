@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { usePi } from "../contexts/PiContext";
 
 interface TrendingTopic {
   name: string;
@@ -19,12 +20,25 @@ interface TopContributor {
   points: number;
 }
 
+interface WeeklyEarnings {
+  total: number;
+  breakdown: {
+    views: number;
+    likes: number;
+    comments: number;
+  };
+  period: string;
+}
+
 export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  const { user } = usePi();
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [topContributors, setTopContributors] = useState<TopContributor[]>([]);
+  const [weeklyEarnings, setWeeklyEarnings] = useState<number>(0);
+  const [isLoadingEarnings, setIsLoadingEarnings] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +61,31 @@ export function Sidebar() {
 
     fetchData();
   }, []);
+
+  // 주간 수익 가져오기 (로그인 시에만)
+  useEffect(() => {
+    const fetchWeeklyEarnings = async () => {
+      if (!user) {
+        setWeeklyEarnings(0);
+        return;
+      }
+
+      setIsLoadingEarnings(true);
+      try {
+        const response = await api.getWeeklyEarnings();
+        if (response.data.success) {
+          setWeeklyEarnings(response.data.data.total);
+        }
+      } catch (error) {
+        console.error('주간 수익 로드 실패:', error);
+        setWeeklyEarnings(0);
+      } finally {
+        setIsLoadingEarnings(false);
+      }
+    };
+
+    fetchWeeklyEarnings();
+  }, [user]);
 
   const navigationItems = [
     { icon: Home, label: t.nav.home, badge: null, path: "/" },
@@ -82,12 +121,20 @@ export function Sidebar() {
       <Separator />
 
       {/* Pi Earnings */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg">
         <div className="flex items-center space-x-2 mb-2">
-          <Coins className="h-4 w-4 text-purple-600" />
+          <Coins className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           <span className="font-medium">{t.home.weeklyEarnings}</span>
         </div>
-        <div className="text-2xl font-bold text-purple-600">+127.3 π</div>
+        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          {isLoadingEarnings ? (
+            <span className="animate-pulse">...</span>
+          ) : user ? (
+            `+${weeklyEarnings.toFixed(1)} π`
+          ) : (
+            <span className="text-base text-muted-foreground">로그인 필요</span>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{t.home.earnedFromDocs}</p>
       </div>
 

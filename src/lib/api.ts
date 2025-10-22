@@ -110,8 +110,21 @@ export const api = {
   markAllNotificationsAsRead: () => apiClient.patch('/notifications/read-all'),
   deleteNotification: (id: string) => apiClient.delete(`/notifications/${id}`),
   
+  // 북마크 관련
+  getMyBookmarks: (params?: { page?: number; limit?: number; folder?: string }) => 
+    apiClient.get('/bookmarks/my', { params }),
+  getBookmarkFolders: () => apiClient.get('/bookmarks/folders'),
+  toggleBookmark: (documentId: string, folder?: string) => 
+    apiClient.post('/bookmarks/toggle', { documentId, folder }),
+  checkBookmarks: (documentIds: string[]) => 
+    apiClient.post('/bookmarks/check', { documentIds }),
+  moveBookmark: (id: string, folder: string) => 
+    apiClient.put(`/bookmarks/${id}/move`, { folder }),
+  deleteBookmark: (id: string) => apiClient.delete(`/bookmarks/${id}`),
+  
   // 지갑 관련
   getWalletInfo: () => apiClient.get('/wallet'),
+  getWeeklyEarnings: () => apiClient.get('/wallet/weekly-earnings'),
   getTransactions: (params?: { limit?: number; offset?: number; type?: string }) => 
     apiClient.get('/wallet/transactions', { params }),
   sendPi: (data: { to: string; amount: number; note?: string }) => 
@@ -133,6 +146,15 @@ export const api = {
   // 커뮤니티 통계
   getTrendingTopics: () => apiClient.get('/community/trending-topics'),
   getTopContributors: () => apiClient.get('/community/top-contributors'),
+  
+  // 태그 관련
+  getTags: (search?: string) => {
+    const params = search ? `?search=${encodeURIComponent(search)}` : '';
+    return apiClient.get(`/tags${params}`);
+  },
+  getTagPosts: (tag: string, limit = 5) => 
+    apiClient.get(`/tags/${encodeURIComponent(tag)}/posts?limit=${limit}`),
+  getTrendingTags: () => apiClient.get('/tags/trending'),
   
   // 헬스체크
   health: () => apiClient.get('/health'),
