@@ -15,7 +15,7 @@ const MOCK_USER = {
 export const mockLogin = () => {
   localStorage.setItem('pi_token', MOCK_USER.accessToken);
   localStorage.setItem('pi_user', JSON.stringify(MOCK_USER));
-  console.log('✅ Mock 로그인 완료:', MOCK_USER);
+  console.log('Mock 로그인 완료:', MOCK_USER);
   return MOCK_USER;
 };
 
@@ -25,7 +25,7 @@ export const mockLogin = () => {
 export const mockLogout = () => {
   localStorage.removeItem('pi_token');
   localStorage.removeItem('pi_user');
-  console.log('✅ Mock 로그아웃 완료');
+  console.log('Mock 로그아웃 완료');
 };
 
 /**
@@ -55,7 +55,7 @@ export const isDevelopment = () => {
  */
 export const autoMockLogin = () => {
   if (isDevelopment() && !isMockAuthenticated()) {
-    console.log('🔧 개발 환경: 자동 Mock 로그인 실행');
+    console.log('개발 환경: 자동 Mock 로그인 실행');
     return mockLogin();
   }
   return getMockUser();
