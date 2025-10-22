@@ -53,12 +53,12 @@ export function NotificationsPage() {
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
-      console.log('📡 알림 페이지 API 호출 시작...');
+      console.log('알림 페이지 API 호출 시작...');
       const response = await api.getNotifications();
-      console.log('✅ 알림 페이지 API 응답:', response.data);
+      console.log('알림 페이지 API 응답:', response.data);
       setNotifications(response.data);
     } catch (error) {
-      console.error('❌ 알림을 가져오는데 실패했습니다:', error);
+      console.error('알림을 가져오는데 실패했습니다:', error);
       setNotifications([]); // 에러 시 빈 배열
     } finally {
       setIsLoading(false);
