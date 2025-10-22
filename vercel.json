@@ -19,5 +19,6 @@
   "env": {
     "VITE_API_BASE_URL": "https://hanpi-api.onrender.com/api",
     "VITE_PI_APP_ID": "test-id-placeholder"
-  }
+  },
+  "outputDirectory": "build"
 }
