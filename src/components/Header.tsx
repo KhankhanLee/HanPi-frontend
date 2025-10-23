@@ -21,9 +21,10 @@ import {
 // Header가 받을 props 타입을 정의합니다.
 interface HeaderProps {
   onNewDocumentClick: () => void;
+  onMenuClick: () => void; // Add this prop
 }
 
-export function Header({ onNewDocumentClick }: HeaderProps) {
+export function Header({ onNewDocumentClick, onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -64,16 +65,14 @@ export function Header({ onNewDocumentClick }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo and App Name */}
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="block md:block" onClick={onMenuClick}> {/* 햄버거 버튼 항상 보이게 */}
             <Menu className="h-5 w-5" />
           </Button>
           <div 
             className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate("/")}
           >
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <span className="font-bold text-white">한</span>
-            </div>
+            <img src="/hanpi-logo.png" alt="Han Pi Logo" className="h-8 w-8 rounded-lg object-cover" />
             <span className="font-semibold text-lg">Han Pi</span>
           </div>
         </div>
