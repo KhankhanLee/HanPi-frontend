@@ -79,11 +79,19 @@ export default function App() {
         <Toaster />
           {/* 모바일에서만 Drawer로 Sidebar 표시 */}
           <div className="md:hidden">
-            <Drawer open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <DrawerContent className="p-0 w-full max-w-xs">
-                <Sidebar />
-              </DrawerContent>
-            </Drawer>
+            {/* Simple controlled mobile drawer: overlay + sliding sidebar */}
+            <div
+              className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+              onClick={() => setMobileMenuOpen(false)}
+              aria-hidden={!isMobileMenuOpen}
+            />
+
+            <aside
+              className={`fixed inset-y-0 left-0 z-50 w-3/4 max-w-xs bg-background p-0 transform transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+              aria-hidden={!isMobileMenuOpen}
+            >
+              <Sidebar />
+            </aside>
           </div>
       </div>
     </Router>
