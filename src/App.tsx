@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
+import { useIsMobile } from "./components/ui/use-mobile";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
@@ -15,29 +16,40 @@ import { DocumentDetailPage } from "./pages/DocumentDetailPage";
 import { CreatePostModal } from "./components/CreatePostModal";
 import { Toaster } from "./components/ui/toaster";
 import { autoMockLogin } from "./utils/mockAuth";
+import { Drawer, DrawerContent } from "./components/ui/drawer";
 
 export default function App() {
   const [isCreatePostModalOpen, setCreatePostModalOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // 새로고침을 위한 상태
+  const [refreshKey, setRefreshKey] = useState(0);
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // 개발 환경에서 자동 Mock 로그인
   useEffect(() => {
     autoMockLogin();
   }, []);
 
   const handlePostCreated = () => {
     setCreatePostModalOpen(false);
-    setRefreshKey(prevKey => prevKey + 1); // 새 글 작성 시 key를 업데이트하여 새로고침 트리거
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   const openCreatePostModal = () => setCreatePostModalOpen(true);
 
+  const isMobile = useIsMobile();
+
   return (
     <Router>
       <div className="min-h-screen bg-background">
-        <Header onNewDocumentClick={openCreatePostModal} />
+        <Header 
+          onNewDocumentClick={openCreatePostModal} 
+          onMenuClick={() => setMobileMenuOpen(true)} 
+        />
         <div className="flex">
-          <Sidebar />
+          {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
+          {!isMobile && (
+            <aside className="w-64">
+              <Sidebar />
+            </aside>
+          )}
           <main className="flex-1">
             <Routes>
               <Route 
@@ -65,6 +77,14 @@ export default function App() {
           onPostCreated={handlePostCreated}
         />
         <Toaster />
+          {/* 모바일에서만 Drawer로 Sidebar 표시 */}
+          <div className="md:hidden">
+            <Drawer open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <DrawerContent className="p-0 w-full max-w-xs">
+                <Sidebar />
+              </DrawerContent>
+            </Drawer>
+          </div>
       </div>
     </Router>
   );
