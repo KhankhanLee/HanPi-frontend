@@ -82,14 +82,45 @@ export function PiProvider({ children }: PiProviderProps) {
 
   // 로그인
   const signIn = useCallback(async () => {
+    const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'development';
+
+    // 개발 환경에서는 Mock 로그인 사용
+    if (isDevelopment) {
+      console.log("개발 환경: Mock 로그인을 시도합니다.");
+      setIsLoading(true);
+      // 실제 네트워크 요청을 흉내 내기 위해 약간의 딜레이 추가
+      setTimeout(() => {
+        const mockUser = {
+          uid: 'mock-user-123',
+          username: 'test_user',
+          accessToken: 'mock-token-' + Date.now(),
+        };
+
+        const userData = {
+          uid: mockUser.uid,
+          username: mockUser.username,
+          accessToken: mockUser.accessToken
+        };
+
+        setUser(userData);
+        localStorage.setItem('pi_user', JSON.stringify(userData));
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
+        
+        console.log("Mock 로그인 성공:", userData);
+        setIsLoading(false);
+      }, 500);
+      return;
+    }
+
+    // --- 프로덕션 환경 (Pi 브라우저) ---
     if (!window.Pi) {
-      alert('Pi SDK가 로드되지 않았습니다. 페이지를 새로고침해주세요.');
+      alert('Pi SDK가 로드되지 않았습니다. Pi 브라우저에서 앱을 실행해주세요.');
       return;
     }
 
     setIsLoading(true);
     try {
-      // Pi Network 인증 (미완료 결제 처리 포함)
+      // Pi Network 인증
       const piUser = await window.Pi.authenticate(
         ['username', 'payments', 'wallet_address'],
         (payment: PiPayment) => {
@@ -114,17 +145,13 @@ export function PiProvider({ children }: PiProviderProps) {
           accessToken: response.data.token || piUser.accessToken
         };
 
-        // 사용자 정보 저장
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
-        
-        // API 클라이언트에 토큰 설정
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
-
         console.log('Backend authentication successful');
+
       } catch (backendError) {
         console.error('Backend authentication failed:', backendError);
-        // 백엔드 인증 실패해도 Pi 사용자 정보는 저장
         const userData = {
           uid: piUser.uid,
           username: piUser.username,
@@ -132,7 +159,6 @@ export function PiProvider({ children }: PiProviderProps) {
         };
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
-        
         if (piUser.accessToken) {
           apiClient.defaults.headers.common['Authorization'] = `Bearer ${piUser.accessToken}`;
         }
