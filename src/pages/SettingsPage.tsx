@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -25,11 +27,33 @@ export function SettingsPage() {
       showPiEarnings: true
     },
     account: {
-      username: "hanpi_dev",
-      email: "hanpi@example.com",
-      piWallet: "1,247.5π"
+      username: "",
+      email: "",
+      piWallet: "0π"
     }
   });
+
+  const { data: meData, isLoading: meLoading, error: meError, refetch: refetchMe } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const resp = await api.getMe();
+      return resp.data?.data ?? resp.data;
+    },
+    staleTime: 30_000,
+  });
+
+  // Populate account fields when meData arrives
+  useEffect(() => {
+    if (!meData) return;
+    setSettings(prev => ({
+      ...prev,
+      account: {
+        username: meData.username ?? prev.account.username,
+        email: meData.email ?? prev.account.email,
+        piWallet: typeof meData.piEarned !== 'undefined' ? `${meData.piEarned}π` : prev.account.piWallet,
+      }
+    }));
+  }, [meData]);
 
   const handleSettingChange = (category: string, key: string, value: any) => {
     setSettings(prev => ({
@@ -61,33 +85,48 @@ export function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="username">{t.settings.account.username}</Label>
-                <Input
-                  id="username"
-                  value={settings.account.username}
-                  onChange={(e) => handleSettingChange('account', 'username', e.target.value)}
-                />
+            {meLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
               </div>
-              <div>
-                <Label htmlFor="email">{t.settings.account.email}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={settings.account.email}
-                  onChange={(e) => handleSettingChange('account', 'email', e.target.value)}
-                />
+            ) : meError ? (
+              <div className="text-sm text-red-600">
+                사용자 정보를 불러오는 중 오류가 발생했습니다.
+                <div className="mt-2">
+                  <Button variant="ghost" onClick={() => refetchMe()}>{t.common.retry}</Button>
+                </div>
               </div>
-            </div>
-            <div>
-              <Label>{t.settings.account.wallet}</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Wallet className="h-4 w-4 text-purple-600" />
-                <span className="font-medium">{settings.account.piWallet}</span>
-              </div>
-            </div>
-            <Button className="w-full md:w-auto">{t.settings.account.save}</Button>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="username">{t.settings.account.username}</Label>
+                    <Input
+                      id="username"
+                      value={settings.account.username}
+                      onChange={(e) => handleSettingChange('account', 'username', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">{t.settings.account.email}</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={settings.account.email}
+                      onChange={(e) => handleSettingChange('account', 'email', e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>{t.settings.account.wallet}</Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Wallet className="h-4 w-4 text-purple-600" />
+                    <span className="font-medium">{settings.account.piWallet}</span>
+                  </div>
+                </div>
+                <Button className="w-full md:w-auto">{t.settings.account.save}</Button>
+              </>
+            )}
           </CardContent>
         </Card>
 

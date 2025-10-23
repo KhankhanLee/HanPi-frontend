@@ -37,6 +37,7 @@ export const en: TranslationKeys = {
     clearAll: "Clear All",
     apply: "Apply",
     reset: "Reset",
+  retry: "Retry",
   },
 
   // Home Page

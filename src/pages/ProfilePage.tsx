@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import type { Post } from "../types";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
@@ -9,36 +12,33 @@ import { Edit, Settings, Wallet, BookOpen, Heart, MessageCircle } from "lucide-r
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
 
-  const userProfile = {
-    name: "김한파이",
-    username: "hanpi_dev",
-    avatar: "",
-    bio: "React와 TypeScript를 사랑하는 개발자입니다. 커뮤니티와 함께 성장하고 싶어요!",
-    stats: {
-      posts: 12,
-      followers: 156,
-      following: 89,
-      piEarned: 1247.5
+  const { data: meData, isLoading, error, refetch } = useQuery({
+    queryKey: ["me"],
+    queryFn: async () => {
+      const resp = await api.getMe();
+      // 백엔드 응답 구조에 따라 data 위치가 다를 수 있으므로 대응
+      return resp.data?.data ?? resp.data;
     },
-    tags: ["React", "TypeScript", "Next.js", "개발자", "한국어"]
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+
+  const userProfile = {
+    name: meData?.name ?? "익명",
+    username: meData?.username ?? "unknown",
+    avatar: meData?.avatar ?? "",
+    bio: meData?.bio ?? "",
+    stats: {
+      posts: meData?.stats?.posts ?? (meData?.posts?.length ?? 0),
+      followers: meData?.stats?.followers ?? meData?.followersCount ?? 0,
+      following: meData?.stats?.following ?? meData?.followingCount ?? 0,
+      piEarned: meData?.stats?.piEarned ?? meData?.piEarned ?? 0,
+    },
+    tags: (meData?.tags ?? []) as string[],
   };
 
-  const userPosts = [
-    {
-      id: "1",
-      title: "React 18의 새로운 기능들과 Concurrent Features 완벽 가이드",
-      content: "React 18에서 도입된 Concurrent Rendering, Suspense, useTransition 등의 새로운 기능들을 실습 예제와 함께 자세히 알아보겠습니다.",
-      stats: { likes: 127, comments: 23, views: 892, piEarned: 45.7 },
-      timestamp: "2시간 전"
-    },
-    {
-      id: "2", 
-      title: "TypeScript 고급 타입 시스템 마스터하기",
-      content: "TypeScript의 고급 타입 기능들을 활용하여 더 안전하고 표현력 있는 코드를 작성하는 방법을 다룹니다.",
-      stats: { likes: 89, comments: 15, views: 567, piEarned: 23.4 },
-      timestamp: "4시간 전"
-    }
-  ];
+  // 백엔드에서 직접 게시물을 반환하면 사용, 없으면 빈 배열
+  const userPosts: Post[] = (meData?.posts ?? []) as Post[];
 
   return (
     <div className="max-w-4xl mx-auto p-6">

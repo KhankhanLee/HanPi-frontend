@@ -35,6 +35,7 @@ export const ko = {
     clearAll: "모두 지우기",
     apply: "적용",
     reset: "초기화",
+    retry: "다시 시도",
   },
 
   // Home Page
