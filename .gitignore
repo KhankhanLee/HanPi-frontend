@@ -1,1 +1,44 @@
 .env
+
+# Node
+node_modules/
+
+# Build outputs
+dist/
+build/
+/.turbo/
+
+# Vite / dev cache
+.vite/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.env.local
+.env.*.local
+.cache/
+coverage/
+
+# Mac specific
+.AppleDouble
+.LSOverride
+
+# Ignore .env but allow .env.example if present
+!.env.example
