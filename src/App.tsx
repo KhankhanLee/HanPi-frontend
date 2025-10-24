@@ -36,12 +36,21 @@ export default function App() {
 
   const isMobile = useIsMobile();
 
+  // lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [isMobileMenuOpen]);
+
   return (
     <Router>
       <div className="min-h-screen bg-background">
         <Header 
           onNewDocumentClick={openCreatePostModal} 
-          onMenuClick={() => setMobileMenuOpen(true)} 
+          onMenuClick={() => setMobileMenuOpen(prev => !prev)} 
         />
         <div className="flex">
           {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
@@ -78,21 +87,23 @@ export default function App() {
         />
         <Toaster />
           {/* 모바일에서만 Drawer로 Sidebar 표시 */}
-          <div className="md:hidden">
-            {/* Simple controlled mobile drawer: overlay + sliding sidebar */}
-            <div
-              className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-200 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-              onClick={() => setMobileMenuOpen(false)}
-              aria-hidden={!isMobileMenuOpen}
-            />
+          {isMobileMenuOpen && (
+            <div className="md:hidden">
+              {/* Overlay */}
+              <div
+                className="fixed inset-0 z-40 bg-black/50"
+                onClick={() => setMobileMenuOpen(false)}
+              />
 
-            <aside
-              className={`fixed inset-y-0 left-0 z-50 w-3/4 max-w-xs bg-background p-0 transform transition-transform duration-200 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
-              aria-hidden={!isMobileMenuOpen}
-            >
-              <Sidebar />
-            </aside>
-          </div>
+              {/* Sliding sidebar (mounted only when open) */}
+              <aside
+                className="fixed inset-y-0 left-0 z-50 w-3/4 max-w-xs bg-background p-0 overflow-y-auto"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
+                <Sidebar />
+              </aside>
+            </div>
+          )}
       </div>
     </Router>
   );
