@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
@@ -21,7 +21,8 @@ import { Drawer, DrawerContent } from "./components/ui/drawer";
 export default function App() {
   const [isCreatePostModalOpen, setCreatePostModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const justOpenedRef = useRef(false);
 
   useEffect(() => {
     autoMockLogin();
@@ -45,11 +46,25 @@ export default function App() {
     }
   }, [isMobileMenuOpen]);
 
+  // Clear justOpened ref after a short delay
+  useEffect(() => {
+    if (justOpenedRef.current) {
+      const timer = setTimeout(() => {
+        justOpenedRef.current = false;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobileMenuOpen]); 
+
   // Close mobile drawer when route changes
   function RouteWatcher() {
     const location = useLocation();
+    const prevPathRef = useRef(location.pathname);
     useEffect(() => {
-      setMobileMenuOpen(false);
+      if (prevPathRef.current !== location.pathname) {
+        setMobileMenuOpen(false);
+        prevPathRef.current = location.pathname;
+      }
     }, [location.pathname]);
     return null;
   }
@@ -60,7 +75,10 @@ export default function App() {
       <div className="min-h-screen bg-background">
         <Header 
           onNewDocumentClick={openCreatePostModal} 
-          onMenuClick={() => setMobileMenuOpen(prev => !prev)} 
+          onMenuClick={() => {
+            justOpenedRef.current = true;
+            setMobileMenuOpen(prev => !prev);
+          }} 
         />
         <div className="flex">
           {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
@@ -101,8 +119,18 @@ export default function App() {
             <div className="md:hidden">
               {/* Overlay */}
               <div
-                className="fixed inset-x-0 top-16 bottom-0 z-50 bg-black/50"
-                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50"
+                onClick={e => {
+                  // Prevent overlay click if user clicks in the top 64px (header)
+                  const headerHeight = 64; // px
+                  if (e.clientY < headerHeight) return;
+                  if (justOpenedRef.current) {
+                    justOpenedRef.current = false;
+                    return;
+                  }
+                  setMobileMenuOpen(false);
+                }}
+                style={{ pointerEvents: 'auto' }}
               />
 
               {/* Sliding sidebar (mounted only when open) */}

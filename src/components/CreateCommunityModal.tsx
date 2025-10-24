@@ -33,7 +33,10 @@ export function CreateCommunityModal({ open, onOpenChange, onCreate }: CreateCom
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        style={{ maxHeight: '80vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
+      >
         <DialogHeader>
           <DialogTitle>{t.modals.createCommunity.title}</DialogTitle>
           <DialogDescription>
@@ -41,51 +44,51 @@ export function CreateCommunityModal({ open, onOpenChange, onCreate }: CreateCom
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right md:text-right text-left md:col-span-1 col-span-1">
               {t.modals.createCommunity.name}
             </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="col-span-3"
+              className="w-full md:col-span-3 col-span-1"
               placeholder={t.modals.createCommunity.namePlaceholder}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right md:text-right text-left md:col-span-1 col-span-1">
               {t.modals.createCommunity.descriptionLabel}
             </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="col-span-3"
+              className="w-full md:col-span-3 col-span-1"
               placeholder={t.modals.createCommunity.descriptionPlaceholder}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <Label htmlFor="category" className="text-right md:text-right text-left md:col-span-1 col-span-1">
               {t.modals.createCommunity.category}
             </Label>
             <Input
               id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="col-span-3"
+              className="w-full md:col-span-3 col-span-1"
               placeholder={t.modals.createCommunity.categoryPlaceholder}
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="tags" className="text-right">
+          <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+            <Label htmlFor="tags" className="text-right md:text-right text-left md:col-span-1 col-span-1">
               {t.modals.createCommunity.tags}
             </Label>
             <Input
               id="tags"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="col-span-3"
+              className="w-full md:col-span-3 col-span-1"
               placeholder={t.modals.createCommunity.tagsPlaceholder}
             />
           </div>
