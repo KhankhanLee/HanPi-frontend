@@ -30,7 +30,7 @@ interface WeeklyEarnings {
   period: string;
 }
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
@@ -105,7 +105,10 @@ export function Sidebar() {
             key={item.label}
             variant={location.pathname === item.path ? "secondary" : "ghost"}
             className="w-full justify-start"
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              navigate(item.path);
+              onNavigate?.();
+            }}
           >
             <item.icon className="h-4 w-4 mr-3" />
             {item.label}
@@ -195,7 +198,10 @@ export function Sidebar() {
       <Button 
         variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
         className="w-full justify-start"
-        onClick={() => navigate("/settings")}
+        onClick={() => {
+          navigate("/settings");
+          onNavigate?.();
+        }}
       >
         <Settings className="h-4 w-4 mr-3" />
         {t.nav.settings}

@@ -66,7 +66,7 @@ export default function App() {
           {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
           {!isMobile && (
             <aside className="w-64">
-              <Sidebar />
+              <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
             </aside>
           )}
           <main className="flex-1">
@@ -111,7 +111,7 @@ export default function App() {
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 <div className="h-full">
-                  <Sidebar />
+                  <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
                 </div>
               </aside>
             </div>
