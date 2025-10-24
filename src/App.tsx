@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { useIsMobile } from "./components/ui/use-mobile";
@@ -45,8 +45,18 @@ export default function App() {
     }
   }, [isMobileMenuOpen]);
 
+  // Close mobile drawer when route changes
+  function RouteWatcher() {
+    const location = useLocation();
+    useEffect(() => {
+      setMobileMenuOpen(false);
+    }, [location.pathname]);
+    return null;
+  }
+
   return (
     <Router>
+      <RouteWatcher />
       <div className="min-h-screen bg-background">
         <Header 
           onNewDocumentClick={openCreatePostModal} 
