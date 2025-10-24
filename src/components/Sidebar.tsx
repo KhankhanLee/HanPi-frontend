@@ -97,7 +97,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 border-r bg-muted/30 p-4 space-y-6">
+  <aside className="h-full border-r bg-muted/30 p-4 space-y-6">
       {/* Navigation */}
       <nav className="space-y-2">
         {navigationItems.map((item) => (

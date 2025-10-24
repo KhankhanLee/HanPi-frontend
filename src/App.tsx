@@ -91,16 +91,18 @@ export default function App() {
             <div className="md:hidden">
               {/* Overlay */}
               <div
-                className="fixed inset-0 z-40 bg-black/50"
+                className="fixed inset-0 z-50 bg-black/50"
                 onClick={() => setMobileMenuOpen(false)}
               />
 
               {/* Sliding sidebar (mounted only when open) */}
               <aside
-                className="fixed inset-y-0 left-0 z-50 w-3/4 max-w-xs bg-background p-0 overflow-y-auto"
+                className="fixed inset-0 left-0 z-60 w-3/4 max-w-xs bg-background p-0 overflow-y-auto"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                <Sidebar />
+                <div className="h-full">
+                  <Sidebar />
+                </div>
               </aside>
             </div>
           )}
