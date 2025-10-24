@@ -101,7 +101,7 @@ export default function App() {
             <div className="md:hidden">
               {/* Overlay */}
               <div
-                className="fixed inset-0 z-50 bg-black/50"
+                className="fixed inset-x-0 top-16 bottom-0 z-50 bg-black/50"
                 onClick={() => setMobileMenuOpen(false)}
               />
 
