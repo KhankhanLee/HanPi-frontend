@@ -65,7 +65,19 @@ export function Header({ onNewDocumentClick, onMenuClick }: HeaderProps) {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo and App Name */}
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="block md:block" onClick={onMenuClick}> {/* 햄버거 버튼 항상 보이게 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="block md:block"
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              // Prevent the click from bubbling to overlays or other global click handlers
+              e.stopPropagation();
+              // stopImmediatePropagation helps in some environments where multiple listeners exist
+              // @ts-ignore - React's SyntheticEvent does not type nativeEvent.stopImmediatePropagation
+              (e.nativeEvent as Event).stopImmediatePropagation?.();
+              onMenuClick();
+            }}
+          >
             <Menu className="h-5 w-5" />
           </Button>
           <div 
