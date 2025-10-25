@@ -255,6 +255,22 @@ export function PiProvider({ children }: PiProviderProps) {
     }
   }, [user]);
 
+  // API 요청 전 토큰 확인
+  if (!apiClient.defaults.headers.common['Authorization']) {
+    const savedUser = localStorage.getItem('pi_user');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      if (parsedUser.accessToken) {
+        console.log('Restoring Authorization header with token:', parsedUser.accessToken);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.accessToken}`;
+      } else {
+        console.warn('No accessToken found in localStorage');
+      }
+    } else {
+      console.warn('No user data found in localStorage');
+    }
+  }
+
   const value: PiContextType = {
     user,
     isAuthenticated: !!user,
