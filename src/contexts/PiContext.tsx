@@ -41,6 +41,7 @@ export function PiProvider({ children }: PiProviderProps) {
             setUser(parsedUser);
             
             if (parsedUser.accessToken) {
+              console.log('Setting Authorization header with token:', parsedUser.accessToken);
               apiClient.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.accessToken}`;
             }
           }
@@ -67,11 +68,12 @@ export function PiProvider({ children }: PiProviderProps) {
             
             // 백엔드에 토큰 설정
             if (parsedUser.accessToken) {
+              console.log('Setting Authorization header with token:', parsedUser.accessToken);
               apiClient.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.accessToken}`;
             }
           }
         } else {
-          console.warn('⚠️ Pi SDK not loaded - Pi Browser 필요');
+          console.warn('Pi SDK not loaded - Pi Browser 필요');
           setIsInitialized(true); // 초기화 상태만 true로 설정
         }
       } catch (error) {
@@ -107,6 +109,7 @@ export function PiProvider({ children }: PiProviderProps) {
 
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
+        console.log('Setting Authorization header with token:', userData.accessToken);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
         
         console.log("Mock 로그인 성공:", userData);
@@ -150,6 +153,7 @@ export function PiProvider({ children }: PiProviderProps) {
 
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
+        console.log('Setting Authorization header with token:', userData.accessToken);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
         console.log('Backend authentication successful');
 
@@ -162,9 +166,8 @@ export function PiProvider({ children }: PiProviderProps) {
         };
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
-        if (piUser.accessToken) {
-          apiClient.defaults.headers.common['Authorization'] = `Bearer ${piUser.accessToken}`;
-        }
+        console.log('Setting Authorization header with token:', piUser.accessToken);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${piUser.accessToken}`;
       }
     } catch (error) {
       console.error('Pi authentication failed:', error);
