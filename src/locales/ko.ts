@@ -36,6 +36,7 @@ export const ko = {
     apply: "적용",
     reset: "초기화",
     retry: "다시 시도",
+    loginWithPi: "Pi로 로그인",
   },
 
   // Home Page

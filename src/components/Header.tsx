@@ -178,11 +178,11 @@ export function Header({ onNewDocumentClick, onMenuClick }: HeaderProps) {
               className="gap-2"
             >
               {isLoading ? (
-                <>로그인 중...</>
+                <>logging...</>
               ) : (
                 <>
                   <LogIn className="h-4 w-4" />
-                  Pi로 로그인
+                  {t.common.loginWithPi}
                 </>
               )}
             </Button>

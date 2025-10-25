@@ -161,6 +161,9 @@ export const api = {
   createTag: (data: { name: string; description: string }) => {
     return apiClient.post('/tags', data);
   },
+  deleteTag: (tagName: string) => {
+    return apiClient.delete(`/tags/${encodeURIComponent(tagName)}`);
+  },
 };
 
 // API 연결 테스트 함수

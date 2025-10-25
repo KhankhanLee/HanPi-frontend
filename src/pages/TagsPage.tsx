@@ -157,6 +157,23 @@ export function TagsPage() {
     }
   };
 
+  const handleDeleteTag = async (tagName: string) => {
+    if (!window.confirm(`태그 '${tagName}'를 삭제하시겠습니까?`)) return;
+
+    try {
+      const response = await api.deleteTag(tagName);
+      if (response.data.success) {
+        alert("태그가 성공적으로 삭제되었습니다!");
+        fetchTags(); // 태그 목록 새로고침
+      } else {
+        alert("태그 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("태그 삭제 중 오류 발생:", error);
+      alert("태그 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -341,6 +358,13 @@ export function TagsPage() {
                       </div>
                     </CardContent>
                   )}
+                  <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteTag(tag.name)}
+                          >
+                            삭제
+                          </Button>
                 </Card>
               ))}
                 </>
