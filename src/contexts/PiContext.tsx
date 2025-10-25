@@ -50,14 +50,22 @@ export function PiProvider({ children }: PiProviderProps) {
 
         // 프로덕션 환경에서만 Pi SDK 초기화
         if (typeof window !== 'undefined' && window.Pi) {
+          // Pi SDK 초기화 디버깅
           console.log('Initializing Pi SDK with sandbox mode:', import.meta.env.VITE_PI_SANDBOX_MODE === 'true');
-          await window.Pi.init({ 
-            version: "2.0",
-            sandbox: import.meta.env.VITE_PI_SANDBOX_MODE === 'true' 
-          });
-          console.log('Pi SDK initialized successfully');
+          try {
+            await window.Pi.init({ 
+              version: "2.0",
+              sandbox: import.meta.env.VITE_PI_SANDBOX_MODE === 'true' 
+            });
+            console.log('Pi SDK initialized successfully');
+            setIsInitialized(true);
+          } catch (initError) {
+            console.error('Failed to initialize Pi SDK:', initError);
+            alert('Pi SDK 초기화에 실패했습니다. Pi Browser에서 다시 시도해주세요.');
+            setIsInitialized(false);
+            return;
+          }
 
-          setIsInitialized(true);
           console.log('Pi SDK initialized');
 
           // 저장된 사용자 정보 복원
@@ -126,19 +134,17 @@ export function PiProvider({ children }: PiProviderProps) {
 
     setIsLoading(true);
     try {
-      // Pi Network 인증
-      const piUser = await window.Pi.authenticate(
-        ['username', 'payments', 'wallet_address'],
-        (payment: PiPayment) => {
-          console.log('Incomplete payment found:', payment);
-          // TODO: 미완료 결제 처리 로직
-        }
-      );
-
-      console.log('Pi authentication successful:', piUser);
-
-      // 백엔드로 토큰 전송 및 검증
+      // Pi SDK 인증 디버깅
       try {
+        const piUser = await window.Pi.authenticate(
+          ['username', 'payments', 'wallet_address'],
+          (payment: PiPayment) => {
+            console.log('Incomplete payment found:', payment);
+          }
+        );
+
+        console.log('Pi authentication successful:', piUser);
+
         const response = await api.piLogin({
           accessToken: piUser.accessToken || '',
           uid: piUser.uid,
@@ -153,21 +159,12 @@ export function PiProvider({ children }: PiProviderProps) {
 
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
-        console.log('Setting Authorization header with token:', userData.accessToken);
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
         console.log('Backend authentication successful');
-
-      } catch (backendError) {
-        console.error('Backend authentication failed:', backendError);
-        const userData = {
-          uid: piUser.uid,
-          username: piUser.username,
-          accessToken: piUser.accessToken
-        };
-        setUser(userData);
-        localStorage.setItem('pi_user', JSON.stringify(userData));
-        console.log('Setting Authorization header with token:', piUser.accessToken);
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${piUser.accessToken}`;
+      } catch (authError) {
+        console.error('Pi authentication failed:', authError);
+        alert('Pi Network 로그인에 실패했습니다. 다시 시도해주세요.');
+        setUser(null);
       }
     } catch (error) {
       console.error('Pi authentication failed:', error);
