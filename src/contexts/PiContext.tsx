@@ -49,10 +49,13 @@ export function PiProvider({ children }: PiProviderProps) {
 
         // 프로덕션 환경에서만 Pi SDK 초기화
         if (typeof window !== 'undefined' && window.Pi) {
+          console.log('Initializing Pi SDK with sandbox mode:', import.meta.env.VITE_PI_SANDBOX_MODE === 'true');
           await window.Pi.init({ 
             version: "2.0",
             sandbox: import.meta.env.VITE_PI_SANDBOX_MODE === 'true' 
           });
+          console.log('Pi SDK initialized successfully');
+
           setIsInitialized(true);
           console.log('Pi SDK initialized');
 
