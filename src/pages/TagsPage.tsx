@@ -22,6 +22,7 @@ import {
   Plus
 } from "lucide-react";
 import { api } from "../lib/api";
+import { TAGModal } from "../components/ui/tag_modal";
 
 interface TagPost {
   id: number;
@@ -56,6 +57,9 @@ export function TagsPage() {
   const [activeTab, setActiveTab] = useState("trending");
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const [newTagDescription, setNewTagDescription] = useState("");
 
   // 태그 데이터 로드
   useEffect(() => {
@@ -101,6 +105,15 @@ export function TagsPage() {
     return () => clearTimeout(debounceTimer);
   }, [searchTerm]);
 
+  const fetchTags = async () => {
+    try {
+      const response = await api.getTags();
+      setTags(response.data.tags);
+    } catch (error) {
+      console.error("태그 목록을 가져오는 중 오류 발생:", error);
+    }
+  };
+
   const filteredTags = tags.filter(tag => {
     const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tag.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -125,6 +138,25 @@ export function TagsPage() {
     return <Badge variant="outline">POPULAR</Badge>;
   };
 
+  const handleCreateTag = async () => {
+    try {
+      const response = await api.createTag({ name: newTagName, description: newTagDescription });
+      if (response.data.success) {
+        alert("태그가 성공적으로 생성되었습니다!");
+        setIsModalOpen(false);
+        setNewTagName("");
+        setNewTagDescription("");
+        // 태그 목록 새로고침
+        fetchTags();
+      } else {
+        alert("태그 생성에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("태그 생성 중 오류 발생:", error);
+      alert("태그 생성 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -136,11 +168,36 @@ export function TagsPage() {
           </h1>
           <p className="text-muted-foreground mt-2">관심 있는 주제의 태그를 팔로우하고 최신 콘텐츠를 확인하세요.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus className="h-4 w-4" />
           새 태그 만들기
         </Button>
       </div>
+
+      {/* Modal for creating a new tag */}
+      <TAGModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2 className="text-xl font-bold mb-4">새 태그 만들기</h2>
+        <div className="space-y-4">
+          <Input
+            placeholder="태그 이름"
+            value={newTagName}
+            onChange={(e) => setNewTagName(e.target.value)}
+          />
+          <Input
+            placeholder="태그 설명"
+            value={newTagDescription}
+            onChange={(e) => setNewTagDescription(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end mt-6">
+          <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            취소
+          </Button>
+          <Button className="ml-2" onClick={handleCreateTag}>
+            생성
+          </Button>
+        </div>
+      </TAGModal>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main Content */}

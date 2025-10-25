@@ -158,6 +158,9 @@ export const api = {
   
   // 헬스체크
   health: () => apiClient.get('/health'),
+  createTag: (data: { name: string; description: string }) => {
+    return apiClient.post('/tags', data);
+  },
 };
 
 // API 연결 테스트 함수

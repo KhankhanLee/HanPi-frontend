@@ -50,38 +50,39 @@ export function PiProvider({ children }: PiProviderProps) {
 
         // 프로덕션 환경에서만 Pi SDK 초기화
         if (typeof window !== 'undefined' && window.Pi) {
-          // Pi SDK 초기화 디버깅
-          console.log('Initializing Pi SDK with sandbox mode:', import.meta.env.VITE_PI_SANDBOX_MODE === 'true');
+          console.log('[DEBUG] Pi SDK detected. Initializing...');
+          console.log('[DEBUG] Sandbox mode:', import.meta.env.VITE_PI_SANDBOX_MODE === 'true');
           try {
             await window.Pi.init({ 
               version: "2.0",
               sandbox: import.meta.env.VITE_PI_SANDBOX_MODE === 'true' 
             });
-            console.log('Pi SDK initialized successfully');
+            console.log('[DEBUG] Pi SDK initialized successfully');
             setIsInitialized(true);
           } catch (initError) {
-            console.error('Failed to initialize Pi SDK:', initError);
+            console.error('[DEBUG] Failed to initialize Pi SDK:', initError);
             alert('Pi SDK 초기화에 실패했습니다. Pi Browser에서 다시 시도해주세요.');
             setIsInitialized(false);
             return;
           }
 
-          console.log('Pi SDK initialized');
+          console.log('[DEBUG] Pi SDK initialization complete');
 
           // 저장된 사용자 정보 복원
           const savedUser = localStorage.getItem('pi_user');
           if (savedUser) {
+            console.log('[DEBUG] Restoring saved user:', savedUser);
             const parsedUser = JSON.parse(savedUser);
             setUser(parsedUser);
             
             // 백엔드에 토큰 설정
             if (parsedUser.accessToken) {
-              console.log('Setting Authorization header with token:', parsedUser.accessToken);
+              console.log('[DEBUG] Setting Authorization header with token:', parsedUser.accessToken);
               apiClient.defaults.headers.common['Authorization'] = `Bearer ${parsedUser.accessToken}`;
             }
           }
         } else {
-          console.warn('Pi SDK not loaded - Pi Browser 필요');
+          console.warn('[DEBUG] Pi SDK not loaded - Pi Browser required');
           setIsInitialized(true); // 초기화 상태만 true로 설정
         }
       } catch (error) {
