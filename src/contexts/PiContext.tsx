@@ -102,26 +102,21 @@ export function PiProvider({ children }: PiProviderProps) {
     if (isDevelopment) {
       console.log("개발 환경: Mock 로그인을 시도합니다.");
       setIsLoading(true);
-      // 실제 네트워크 요청을 흉내 내기 위해 약간의 딜레이 추가
       setTimeout(() => {
-        const mockUser = {
-          uid: 'mock-user-123',
+        //[FIX 1] Mock 데이터도 실제 백엔드 응답과 똑같이 만듭니다.
+        const mockUserData = {
+          uid: 'mock-db-uid-123', // DB의 UID
           username: 'test_user',
-          accessToken: 'mock-token-' + Date.now(),
+          piId: 'mock-pi-uid-456', // Pi UID
+          accessToken: 'mock-jwt-token-' + Date.now(), // JWT 토큰
         };
 
-        const userData = {
-          uid: mockUser.uid,
-          username: mockUser.username,
-          accessToken: mockUser.accessToken
-        };
-
-        setUser(userData);
-        localStorage.setItem('pi_user', JSON.stringify(userData));
-        console.log('Setting Authorization header with token:', userData.accessToken);
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
+        setUser(mockUserData);
+        localStorage.setItem('pi_user', JSON.stringify(mockUserData));
+        console.log('Setting Authorization header with token:', mockUserData.accessToken);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${mockUserData.accessToken}`;
         
-        console.log("Mock 로그인 성공:", userData);
+        console.log("Mock 로그인 성공:", mockUserData);
         setIsLoading(false);
       }, 500);
       return;
@@ -135,7 +130,6 @@ export function PiProvider({ children }: PiProviderProps) {
 
     setIsLoading(true);
     try {
-      // Pi SDK 인증 디버깅
       try {
         const piUser = await window.Pi.authenticate(
           ['username', 'payments', 'wallet_address'],
@@ -146,29 +140,43 @@ export function PiProvider({ children }: PiProviderProps) {
 
         console.log('Pi authentication successful:', piUser);
 
+        // 백엔드에 로그인 요청
         const response = await api.piLogin({
           accessToken: piUser.accessToken || '',
           uid: piUser.uid,
           username: piUser.username
         });
 
+        // [FIX 2] 백엔드 응답을 확인합니다.
+        // (백엔드 응답: { success: true, token: '...', user: { uid: '...', username: '...', piId: '...' } })
+        if (!response.data || !response.data.success || !response.data.token || !response.data.user) {
+          console.error('Backend login failed:', response.data?.message || 'No token/user in response');
+          alert('백엔드 로그인에 실패했습니다. (서버 응답 오류)');
+          setIsLoading(false);
+          return; 
+        }
+
+        // [FIX 3] 백엔드가 보내준 'response.data.user'와 'response.data.token'을 사용합니다.
         const userData = {
-          uid: piUser.uid,
-          username: piUser.username,
-          accessToken: response.data.token || piUser.accessToken
+          uid: response.data.user.uid,           
+          username: response.data.user.username, 
+          piId: response.data.user.piId,         
+          accessToken: response.data.token       
         };
 
+        // 이제 이 userData는 앱의 다른 모든 컴포넌트가 기대하는 형태와 일치합니다.
         setUser(userData);
         localStorage.setItem('pi_user', JSON.stringify(userData));
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.accessToken}`;
-        console.log('Backend authentication successful');
+        console.log('Backend authentication successful. User data stored:', userData);
+
       } catch (authError) {
-        console.error('Pi authentication failed:', authError);
+        console.error('Pi or Backend authentication failed:', authError);
         alert('Pi Network 로그인에 실패했습니다. 다시 시도해주세요.');
         setUser(null);
       }
     } catch (error) {
-      console.error('Pi authentication failed:', error);
+      console.error('Outer Pi authentication failed:', error);
       alert('Pi Network 로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
