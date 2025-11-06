@@ -222,22 +222,41 @@ export function PiProvider({ children }: PiProviderProps) {
         // 서버 승인 대기
         onReadyForServerApproval: (paymentId: string) => {
           console.log('Payment ready for server approval:', paymentId);
-          // 백엔드에 승인 요청
-          api.approvePayment(paymentId)
-            .then(() => console.log('Payment approved'))
-            .catch((err: Error) => console.error('Payment approval failed:', err));
+          // 백엔드에 승인 요청 - metadata에서 documentId 확인
+          if (metadata.documentId) {
+            // 문서 구매의 경우
+            api.approvePurchase(metadata.documentId, paymentId)
+              .then(() => console.log('Purchase approved'))
+              .catch((err: Error) => console.error('Purchase approval failed:', err));
+          } else {
+            // 일반 결제의 경우
+            api.approvePayment(paymentId)
+              .then(() => console.log('Payment approved'))
+              .catch((err: Error) => console.error('Payment approval failed:', err));
+          }
         },
         
         // 서버 완료 대기
         onReadyForServerCompletion: (paymentId: string, txid: string) => {
           console.log('Payment ready for completion:', paymentId, txid);
           // 백엔드에 완료 요청
-          api.completePayment(paymentId, txid)
-            .then(() => {
-              console.log('Payment completed');
-              alert('결제가 완료되었습니다!');
-            })
-            .catch((err: Error) => console.error('Payment completion failed:', err));
+          if (metadata.documentId) {
+            // 문서 구매의 경우
+            api.completePurchase(metadata.documentId, paymentId, txid)
+              .then(() => {
+                console.log('Purchase completed');
+                alert('구매가 완료되었습니다!');
+              })
+              .catch((err: Error) => console.error('Purchase completion failed:', err));
+          } else {
+            // 일반 결제의 경우
+            api.completePayment(paymentId, txid)
+              .then(() => {
+                console.log('Payment completed');
+                alert('결제가 완료되었습니다!');
+              })
+              .catch((err: Error) => console.error('Payment completion failed:', err));
+          }
         },
         
         // 취소

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, MoreVertical, Edit2, Trash2, Eye } from 'lucide-react';
+import { ArrowLeft, Share2, MoreVertical, Edit2, Trash2, Eye, Lock, ShoppingCart, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -15,9 +15,10 @@ import { CommentSection } from '@/components/CommentSection';
 import { LikeButton } from '@/components/LikeButton';
 import { BookmarkButton } from '@/components/BookmarkButton';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/lib/api';
+import { api, apiClient } from '@/lib/api';
 import { getMockUser } from '@/utils/mockAuth';
 import { io, Socket } from 'socket.io-client';
+import { usePi } from '@/contexts/PiContext';
 
 interface Document {
   id: string;
@@ -49,7 +50,11 @@ export function DocumentDetailPage() {
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
   const { toast } = useToast();
+  const { user, isAuthenticated, createPayment } = usePi();
   const currentUser = getMockUser();
 
   // Socket.IO 연결 설정
@@ -104,8 +109,29 @@ export function DocumentDetailPage() {
   useEffect(() => {
     if (id) {
       loadDocument(parseInt(id));
+      checkPurchaseStatus(parseInt(id));
     }
   }, [id]);
+
+  // 구매 여부 확인
+  const checkPurchaseStatus = async (docId: number) => {
+    if (!isAuthenticated || !user) {
+      setHasPurchased(false);
+      return;
+    }
+
+    setCheckingPurchase(true);
+    try {
+      const response = await api.checkPurchase(docId.toString());
+      setHasPurchased(response.data.hasPurchased);
+      console.log('구매 여부:', response.data.hasPurchased);
+    } catch (error) {
+      console.error('구매 여부 확인 실패:', error);
+      setHasPurchased(false);
+    } finally {
+      setCheckingPurchase(false);
+    }
+  };
 
   // 중복 조회 확인 함수 (LocalStorage 사용)
   const hasRecentlyViewed = (docId: number): boolean => {
@@ -222,6 +248,78 @@ export function DocumentDetailPage() {
     });
   };
 
+  // 문서 구매 처리
+  const handlePurchase = async () => {
+    if (!isAuthenticated || !user) {
+      toast({
+        title: '로그인 필요',
+        description: 'Pi로 로그인해주세요.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!document || !document.pricePi || document.pricePi <= 0) {
+      toast({
+        title: '오류',
+        description: '구매할 수 없는 문서입니다.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPurchasing(true);
+
+    try {
+      console.log('문서 구매 시작:', { documentId: document.id, price: document.pricePi });
+
+      // 1. 백엔드에 구매 요청 (Pi Platform에 결제 생성)
+      const initiateResponse = await api.initiatePurchase(document.id);
+      const { payment, purchase } = initiateResponse.data;
+
+      console.log('구매 요청 성공:', { payment, purchase });
+
+      // 2. Pi SDK로 결제 진행
+      const piPayment = await createPayment(
+        document.pricePi,
+        `문서 구매: ${document.title}`,
+        {
+          documentId: document.id,
+          documentTitle: document.title,
+          type: 'document_purchase'
+        }
+      );
+
+      if (!piPayment) {
+        throw new Error('Pi 결제 생성 실패');
+      }
+
+      console.log('Pi 결제 완료:', piPayment);
+
+      // 3. 구매 성공 - 페이지 새로고침
+      toast({
+        title: '구매 완료!',
+        description: '문서를 구매했습니다.',
+      });
+
+      // 구매 상태 업데이트
+      setHasPurchased(true);
+      
+      // 문서 다시 로드
+      await loadDocument(parseInt(document.id));
+
+    } catch (error: any) {
+      console.error('문서 구매 실패:', error);
+      toast({
+        title: '구매 실패',
+        description: error.response?.data?.message || '문서 구매에 실패했습니다.',
+        variant: 'destructive',
+      });
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -251,6 +349,8 @@ export function DocumentDetailPage() {
   }
 
   const isAuthor = currentUser?.uid === document.author.username;
+  const isPaidDocument = document.pricePi && document.pricePi > 0;
+  const canViewContent = isAuthor || !isPaidDocument || hasPurchased;
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -290,6 +390,18 @@ export function DocumentDetailPage() {
                 {document.tags && document.tags.map((tag, index) => (
                   <Badge key={index} variant="outline">{tag}</Badge>
                 ))}
+                {isPaidDocument && (
+                  <Badge className="bg-purple-500 text-white">
+                    <ShoppingCart className="h-3 w-3 mr-1" />
+                    {document.pricePi}π
+                  </Badge>
+                )}
+                {hasPurchased && isPaidDocument && (
+                  <Badge className="bg-green-500 text-white">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    구매 완료
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -336,13 +448,47 @@ export function DocumentDetailPage() {
         </CardHeader>
 
         <CardContent>
-          {/* 문서 내용 */}
-          <div className="prose max-w-none">
-            <div 
-              className="text-base leading-relaxed whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: document.content }}
-            />
-          </div>
+          {/* 유료 문서 구매 필요 */}
+          {!canViewContent && (
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border-2 border-dashed border-purple-300">
+              <Lock className="h-16 w-16 text-purple-400 mb-4" />
+              <h3 className="text-xl font-bold mb-2">유료 콘텐츠</h3>
+              <p className="text-gray-600 mb-6 text-center">
+                이 문서는 <span className="font-bold text-purple-600">{document.pricePi}π</span>로 구매할 수 있습니다.
+              </p>
+              <Button
+                onClick={handlePurchase}
+                disabled={purchasing || checkingPurchase}
+                size="lg"
+                className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-bold"
+              >
+                {purchasing ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                    구매 중...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    {document.pricePi}π로 구매하기
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-gray-500 mt-4">
+                구매 후 언제든지 열람할 수 있습니다
+              </p>
+            </div>
+          )}
+
+          {/* 문서 내용 (무료 or 구매 완료 시) */}
+          {canViewContent && (
+            <div className="prose max-w-none">
+              <div 
+                className="text-base leading-relaxed whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: document.content }}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

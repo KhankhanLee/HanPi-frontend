@@ -136,6 +136,13 @@ export const api = {
   completePayment: (paymentId: string, txid: string) => apiClient.post(`/payment/complete/${paymentId}`, { txid }),
   getPaymentStatus: (paymentId: string) => apiClient.get(`/payment/status/${paymentId}`),
   
+  // 문서 구매 관련
+  checkPurchase: (documentId: string) => apiClient.get(`/purchases/check/${documentId}`),
+  initiatePurchase: (documentId: string) => apiClient.post(`/purchases/${documentId}/initiate`),
+  approvePurchase: (documentId: string, paymentId: string) => apiClient.post(`/purchases/${documentId}/approve`, { paymentId }),
+  completePurchase: (documentId: string, paymentId: string, txid: string) => apiClient.post(`/purchases/${documentId}/complete`, { paymentId, txid }),
+  getMyPurchases: () => apiClient.get('/purchases/my'),
+  
   // Pi 인증 관련
   piLogin: (data: { accessToken: string; uid: string; username: string }) => 
     apiClient.post('/auth/pi-login', data),
