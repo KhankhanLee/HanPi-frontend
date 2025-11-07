@@ -16,6 +16,7 @@ import { DocumentDetailPage } from "./pages/DocumentDetailPage";
 import { CreatePostModal } from "./components/CreatePostModal";
 import { Toaster } from "./components/ui/toaster";
 import { autoMockLogin } from "./utils/mockAuth";
+import { Drawer, DrawerContent } from "./components/ui/drawer";
 
 export default function App() {
   const [isCreatePostModalOpen, setCreatePostModalOpen] = useState(false);
@@ -75,22 +76,10 @@ export default function App() {
         <Header 
           onNewDocumentClick={openCreatePostModal} 
           onMenuClick={() => {
-            console.log('Menu clicked, current state:', isMobileMenuOpen, 'isMobile:', isMobile);
             justOpenedRef.current = true;
-            setMobileMenuOpen(prev => {
-              const newState = !prev;
-              console.log('Setting mobile menu to:', newState);
-              return newState;
-            });
+            setMobileMenuOpen(prev => !prev);
           }} 
         />
-
-        {/* Debug info - 임시로 표시 */}
-        {isMobile && (
-          <div className="fixed top-20 right-4 z-50 bg-red-500 text-white p-2 text-xs rounded">
-            Mobile: {isMobile ? 'true' : 'false'}, Menu: {isMobileMenuOpen ? 'open' : 'closed'}
-          </div>
-        )}
         <div className="flex">
           {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
           {!isMobile && (
@@ -125,38 +114,36 @@ export default function App() {
           onPostCreated={handlePostCreated}
         />
         <Toaster />
-
-        {/* 모바일 사이드바 - 항상 렌더링하되 transform으로 제어 */}
-        {isMobile && (
-          <>
-            {/* Overlay - 헤더 아래에만 위치 */}
+        
+        {/* 모바일에서만 Drawer로 Sidebar 표시 */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            {/* Overlay */}
             <div
-              className={`fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 transition-opacity duration-300 ${
-                isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
-              onClick={() => {
-                if (!justOpenedRef.current) {
-                  setMobileMenuOpen(false);
+              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50"
+              onClick={e => {
+                // Prevent overlay click if user clicks in the top 64px (header)
+                const headerHeight = 64; // px
+                if (e.clientY < headerHeight) return;
+                if (justOpenedRef.current) {
+                  justOpenedRef.current = false;
+                  return;
                 }
-                justOpenedRef.current = false;
+                setMobileMenuOpen(false);
               }}
+              style={{ pointerEvents: 'auto' }}
             />
 
-            {/* Sliding sidebar */}
+            {/* Sliding sidebar (mounted only when open) */}
             <aside
-              className={`fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background border-r overflow-y-auto transition-transform duration-300 ease-in-out ${
-                isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-              }`}
-              style={{ 
-                WebkitOverflowScrolling: 'touch',
-                transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)'
-              }}
+              className="fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background overflow-y-auto"
+              style={{ WebkitOverflowScrolling: 'touch' }}
             >
-              <div className="h-full flex flex-col p-4">
+              <div className="h-full flex flex-col">
                 <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
               </div>
             </aside>
-          </>
+          </div>
         )}
       </div>
     </Router>

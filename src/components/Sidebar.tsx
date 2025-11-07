@@ -97,116 +97,121 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   ];
 
   return (
-  <aside className="h-full border-r bg-muted/30 p-4 space-y-4 overflow-y-auto">
-      {/* Navigation */}
-      <nav className="space-y-2">
-        {navigationItems.map((item) => (
-          <Button
-            key={item.label}
-            variant={location.pathname === item.path ? "secondary" : "ghost"}
+    <aside className="h-full border-r bg-muted/30 overflow-y-auto">
+      <div className="p-4 space-y-4 min-h-full flex flex-col">
+        {/* Navigation */}
+        <nav className="space-y-2">
+          {navigationItems.map((item) => (
+            <Button
+              key={item.label}
+              variant={location.pathname === item.path ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => {
+                navigate(item.path);
+                onNavigate?.();
+              }}
+            >
+              <item.icon className="h-4 w-4 mr-3" />
+              {item.label}
+              {item.badge && (
+                <Badge variant="secondary" className="ml-auto">
+                  {item.badge}
+                </Badge>
+              )}
+            </Button>
+          ))}
+        </nav>
+
+        <Separator />
+
+        {/* Pi Earnings */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg">
+          <div className="flex items-center space-x-2 mb-2">
+            <Coins className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            <span className="font-medium">{t.home.weeklyEarnings}</span>
+          </div>
+          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            {isLoadingEarnings ? (
+              <span className="animate-pulse">...</span>
+            ) : user ? (
+              `+${weeklyEarnings.toFixed(1)} π`
+            ) : (
+              <span className="text-base text-muted-foreground">로그인 필요</span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">{t.home.earnedFromDocs}</p>
+        </div>
+
+        <Separator />
+
+        {/* Trending Topics */}
+        <div>
+          <h3 className="font-medium mb-3">{t.home.trendingTopics}</h3>
+          <div className="space-y-2">
+            {trendingTopics.length > 0 ? (
+              trendingTopics.slice(0, 3).map((topic) => (
+                <div key={topic.name} className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{topic.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {topic.count}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">최근 인기 토픽이 없습니다</p>
+            )}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Top Contributors */}
+        <div>
+          <h3 className="font-medium mb-3">{t.home.topContributors}</h3>
+          <div className="space-y-3">
+            {topContributors.length > 0 ? (
+              topContributors.slice(0, 3).map((contributor, index) => (
+                <div key={contributor.name} className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span className="w-4 text-xs text-muted-foreground">#{index + 1}</span>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={contributor.avatar} />
+                      <AvatarFallback className="text-xs">
+                        {contributor.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{contributor.name}</span>
+                  </div>
+                  <span className="text-xs text-purple-600 font-medium">
+                    {contributor.points}π
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">최근 활동 기여자가 없습니다</p>
+            )}
+          </div>
+        </div>
+
+        {/* Spacer to push settings to bottom */}
+        <div className="flex-1 min-h-4"></div>
+
+        <Separator />
+
+        {/* Settings - 하단 고정 */}
+        <div className="pb-4">
+          <Button 
+            variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
             className="w-full justify-start"
             onClick={() => {
-              navigate(item.path);
+              navigate("/settings");
               onNavigate?.();
             }}
           >
-            <item.icon className="h-4 w-4 mr-3" />
-            {item.label}
-            {item.badge && (
-              <Badge variant="secondary" className="ml-auto">
-                {item.badge}
-              </Badge>
-            )}
+            <Settings className="h-4 w-4 mr-3" />
+            {t.nav.settings}
           </Button>
-        ))}
-      </nav>
-
-      <Separator />
-
-      {/* Pi Earnings */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg">
-        <div className="flex items-center space-x-2 mb-2">
-          <Coins className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-          <span className="font-medium">{t.home.weeklyEarnings}</span>
         </div>
-        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-          {isLoadingEarnings ? (
-            <span className="animate-pulse">...</span>
-          ) : user ? (
-            `+${weeklyEarnings.toFixed(1)} π`
-          ) : (
-            <span className="text-base text-muted-foreground">로그인 필요</span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">{t.home.earnedFromDocs}</p>
-      </div>
-
-      <Separator />
-
-      {/* Trending Topics */}
-      <div>
-        <h3 className="font-medium mb-3">{t.home.trendingTopics}</h3>
-        <div className="space-y-2">
-          {trendingTopics.length > 0 ? (
-            trendingTopics.slice(0, 3).map((topic) => (
-              <div key={topic.name} className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{topic.name}</span>
-                <Badge variant="outline" className="text-xs">
-                  {topic.count}
-                </Badge>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">최근 인기 토픽이 없습니다</p>
-          )}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Top Contributors */}
-      <div>
-        <h3 className="font-medium mb-3">{t.home.topContributors}</h3>
-        <div className="space-y-3">
-          {topContributors.length > 0 ? (
-            topContributors.slice(0, 3).map((contributor, index) => (
-              <div key={contributor.name} className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2 flex-1">
-                  <span className="w-4 text-xs text-muted-foreground">#{index + 1}</span>
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={contributor.avatar} />
-                    <AvatarFallback className="text-xs">
-                      {contributor.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">{contributor.name}</span>
-                </div>
-                <span className="text-xs text-purple-600 font-medium">
-                  {contributor.points}π
-                </span>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">최근 활동 기여자가 없습니다</p>
-          )}
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Settings - 항상 하단에 고정 */}
-      <div className="mt-auto pt-4">
-        <Button 
-          variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
-          className="w-full justify-start"
-          onClick={() => {
-            navigate("/settings");
-            onNavigate?.();
-          }}
-        >
-          <Settings className="h-4 w-4 mr-3" />
-          {t.nav.settings}
-        </Button>
       </div>
     </aside>
   );
