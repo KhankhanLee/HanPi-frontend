@@ -149,11 +149,13 @@ export default function App() {
                 bottom: 0,
                 width: '75%',
                 maxWidth: '320px',
+                height: 'calc(100vh - 64px)',
+                minHeight: 'calc(100vh - 64px)',
                 zIndex: 9999,
                 WebkitOverflowScrolling: 'touch'
               }}
             >
-              <div className="h-full flex flex-col">
+              <div className="h-full min-h-full flex flex-col">
                 <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
               </div>
             </aside>

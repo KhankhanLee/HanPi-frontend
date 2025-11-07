@@ -98,7 +98,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="h-full border-r bg-muted/30 overflow-y-auto">
-      <div className="p-4 space-y-4 min-h-full flex flex-col">
+      <div className="p-4 space-y-3 min-h-full flex flex-col">
         {/* Navigation */}
         <nav className="space-y-2">
           {navigationItems.map((item) => (
@@ -124,33 +124,32 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
         <Separator />
 
-        {/* Pi Earnings */}
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-4 rounded-lg">
-          <div className="flex items-center space-x-2 mb-2">
+        {/* Pi Earnings - 모바일에서 축소 */}
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 p-3 rounded-lg">
+          <div className="flex items-center space-x-2 mb-1">
             <Coins className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-            <span className="font-medium">{t.home.weeklyEarnings}</span>
+            <span className="font-medium text-sm">{t.home.weeklyEarnings}</span>
           </div>
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <div className="text-xl font-bold text-purple-600 dark:text-purple-400">
             {isLoadingEarnings ? (
               <span className="animate-pulse">...</span>
             ) : user ? (
               `+${weeklyEarnings.toFixed(1)} π`
             ) : (
-              <span className="text-base text-muted-foreground">로그인 필요</span>
+              <span className="text-sm text-muted-foreground">로그인 필요</span>
             )}
           </div>
-          <p className="text-sm text-muted-foreground">{t.home.earnedFromDocs}</p>
         </div>
 
         <Separator />
 
-        {/* Trending Topics */}
+        {/* Trending Topics - 간소화 */}
         <div>
-          <h3 className="font-medium mb-3">{t.home.trendingTopics}</h3>
-          <div className="space-y-2">
+          <h3 className="font-medium mb-2 text-sm">{t.home.trendingTopics}</h3>
+          <div className="space-y-1">
             {trendingTopics.length > 0 ? (
-              trendingTopics.slice(0, 3).map((topic) => (
-                <div key={topic.name} className="flex items-center justify-between text-sm">
+              trendingTopics.slice(0, 2).map((topic) => (
+                <div key={topic.name} className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">{topic.name}</span>
                   <Badge variant="outline" className="text-xs">
                     {topic.count}
@@ -158,7 +157,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">최근 인기 토픽이 없습니다</p>
+              <p className="text-xs text-muted-foreground">인기 토픽 없음</p>
             )}
           </div>
         </div>
@@ -193,13 +192,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
 
-        {/* Spacer to push settings to bottom */}
-        <div className="flex-1 min-h-4"></div>
-
         <Separator />
 
         {/* Settings - 하단 고정 */}
-        <div className="pb-4">
+        <div className="pb-2">
           <Button 
             variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
             className="w-full justify-start"
@@ -212,6 +208,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             {t.nav.settings}
           </Button>
         </div>
+
+        {/* Spacer */}
+        <div className="flex-1 min-h-2"></div>
+
       </div>
     </aside>
   );
