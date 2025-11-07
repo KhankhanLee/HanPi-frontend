@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { useIsMobile } from "./components/ui/use-mobile";
@@ -115,35 +116,49 @@ export default function App() {
         />
         <Toaster />
         
-        {/* 모바일에서만 Drawer로 Sidebar 표시 */}
-        {isMobileMenuOpen && (
+        {/* 모바일 사이드바를 Portal로 body에 마운트 */}
+        {isMobileMenuOpen && typeof document !== 'undefined' && createPortal(
           <div className="md:hidden">
             {/* Overlay */}
             <div
-              className="fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50"
-              onClick={e => {
-                // Prevent overlay click if user clicks in the top 64px (header)
-                const headerHeight = 64; // px
-                if (e.clientY < headerHeight) return;
-                if (justOpenedRef.current) {
-                  justOpenedRef.current = false;
-                  return;
+              className="fixed inset-0 bg-black/50"
+              onClick={() => {
+                if (!justOpenedRef.current) {
+                  setMobileMenuOpen(false);
                 }
-                setMobileMenuOpen(false);
+                justOpenedRef.current = false;
               }}
-              style={{ pointerEvents: 'auto' }}
+              style={{ 
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 9998,
+                pointerEvents: 'auto'
+              }}
             />
 
-            {/* Sliding sidebar (mounted only when open) */}
+            {/* Sliding sidebar */}
             <aside
-              className="fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background overflow-y-auto"
-              style={{ WebkitOverflowScrolling: 'touch' }}
+              className="fixed top-16 bottom-0 left-0 w-3/4 max-w-xs bg-background overflow-y-auto shadow-2xl border-r"
+              style={{ 
+                position: 'fixed',
+                top: '64px',
+                left: 0,
+                bottom: 0,
+                width: '75%',
+                maxWidth: '320px',
+                zIndex: 9999,
+                WebkitOverflowScrolling: 'touch'
+              }}
             >
               <div className="h-full flex flex-col">
                 <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
               </div>
             </aside>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </Router>
