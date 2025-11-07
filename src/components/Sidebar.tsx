@@ -97,7 +97,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   ];
 
   return (
-  <aside className="h-full border-r bg-muted/30 p-4 space-y-6">
+  <aside className="h-full border-r bg-muted/30 p-4 space-y-4 overflow-y-auto">
       {/* Navigation */}
       <nav className="space-y-2">
         {navigationItems.map((item) => (
@@ -148,7 +148,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <h3 className="font-medium mb-3">{t.home.trendingTopics}</h3>
         <div className="space-y-2">
           {trendingTopics.length > 0 ? (
-            trendingTopics.map((topic) => (
+            trendingTopics.slice(0, 3).map((topic) => (
               <div key={topic.name} className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{topic.name}</span>
                 <Badge variant="outline" className="text-xs">
@@ -169,7 +169,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <h3 className="font-medium mb-3">{t.home.topContributors}</h3>
         <div className="space-y-3">
           {topContributors.length > 0 ? (
-            topContributors.map((contributor, index) => (
+            topContributors.slice(0, 3).map((contributor, index) => (
               <div key={contributor.name} className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 flex-1">
                   <span className="w-4 text-xs text-muted-foreground">#{index + 1}</span>
@@ -194,18 +194,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <Separator />
 
-      {/* Settings */}
-      <Button 
-        variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
-        className="w-full justify-start"
-        onClick={() => {
-          navigate("/settings");
-          onNavigate?.();
-        }}
-      >
-        <Settings className="h-4 w-4 mr-3" />
-        {t.nav.settings}
-      </Button>
+      {/* Settings - 항상 하단에 고정 */}
+      <div className="mt-auto pt-4">
+        <Button 
+          variant={location.pathname === "/settings" ? "secondary" : "ghost"} 
+          className="w-full justify-start"
+          onClick={() => {
+            navigate("/settings");
+            onNavigate?.();
+          }}
+        >
+          <Settings className="h-4 w-4 mr-3" />
+          {t.nav.settings}
+        </Button>
+      </div>
     </aside>
   );
 }

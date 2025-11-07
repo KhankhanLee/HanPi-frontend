@@ -135,10 +135,10 @@ export default function App() {
 
               {/* Sliding sidebar (mounted only when open) */}
               <aside
-                className="fixed inset-0 left-0 z-60 w-3/4 max-w-xs bg-background p-0 overflow-y-auto"
+                className="fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background overflow-y-auto"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                <div className="h-full">
+                <div className="h-full flex flex-col">
                   <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
                 </div>
               </aside>
