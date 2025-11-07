@@ -84,6 +84,13 @@ export default function App() {
             });
           }} 
         />
+
+        {/* Debug info - 임시로 표시 */}
+        {isMobile && (
+          <div className="fixed top-20 right-4 z-50 bg-red-500 text-white p-2 text-xs rounded">
+            Mobile: {isMobile ? 'true' : 'false'}, Menu: {isMobileMenuOpen ? 'open' : 'closed'}
+          </div>
+        )}
         <div className="flex">
           {/* 데스크탑: Sidebar는 모바일이 아닐 때만 렌더합니다 (useIsMobile) */}
           {!isMobile && (
@@ -122,9 +129,9 @@ export default function App() {
         {/* 모바일 사이드바 - 항상 렌더링하되 transform으로 제어 */}
         {isMobile && (
           <>
-            {/* Overlay */}
+            {/* Overlay - 헤더 아래에만 위치 */}
             <div
-              className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+              className={`fixed inset-x-0 top-16 bottom-0 z-40 bg-black/50 transition-opacity duration-300 ${
                 isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
               }`}
               onClick={() => {
@@ -137,12 +144,15 @@ export default function App() {
 
             {/* Sliding sidebar */}
             <aside
-              className={`fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+              className={`fixed top-16 bottom-0 left-0 z-50 w-3/4 max-w-xs bg-background border-r overflow-y-auto transition-transform duration-300 ease-in-out ${
                 isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
               }`}
-              style={{ WebkitOverflowScrolling: 'touch' }}
+              style={{ 
+                WebkitOverflowScrolling: 'touch',
+                transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)'
+              }}
             >
-              <div className="h-full flex flex-col">
+              <div className="h-full flex flex-col p-4">
                 <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
               </div>
             </aside>
