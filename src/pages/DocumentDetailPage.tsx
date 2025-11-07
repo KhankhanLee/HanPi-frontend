@@ -160,7 +160,15 @@ export function DocumentDetailPage() {
       console.log('문서 로드 시작:', docId);
       const response = await apiClient.get(`/docs/${docId}`);
       console.log('문서 API 응답:', response.data);
+      
       const loadedDoc = response.data;
+      
+      // 데이터 검증
+      if (!loadedDoc.id || !loadedDoc.title) {
+        console.error('잘못된 문서 데이터:', loadedDoc);
+        throw new Error('문서 데이터가 올바르지 않습니다.');
+      }
+      
       setDocument(loadedDoc);
       
       // 조회수 증가 로직
@@ -197,9 +205,16 @@ export function DocumentDetailPage() {
       }
     } catch (error: any) {
       console.error('문서 로드 실패:', error);
+      console.error('에러 상세:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        url: error.config?.url
+      });
+      
       toast({
         title: '오류',
-        description: '문서를 불러오는데 실패했습니다.',
+        description: error.response?.data?.message || '문서를 불러오는데 실패했습니다.',
         variant: 'destructive',
       });
     } finally {
