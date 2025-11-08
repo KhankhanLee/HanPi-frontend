@@ -11,7 +11,7 @@ interface Comment {
   id: number;
   content: string;
   user_id: string;
-  user_name: string;
+  username: string; 
   user_avatar?: string;
   created_at: string;
   updated_at: string;
@@ -40,7 +40,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadComments = async () => {
     try {
       console.log('댓글 로드 시작:', documentId);
-      const response = await apiClient.get(`/comments/documents/${documentId}/comments`);
+      const response = await apiClient.get(`/api/comments/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       setComments(data);
@@ -58,7 +58,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadReplies = async (commentId: number) => {
     try {
       console.log('대댓글 로드 시작:', commentId);
-      const response = await apiClient.get(`/comments/comments/${commentId}/replies`);
+      const response = await apiClient.get(`/api/comments/comments/${commentId}/replies`);
       console.log('대댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       
@@ -90,7 +90,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 작성 시작:', documentId, newComment);
-      await apiClient.post(`/comments/documents/${documentId}/comments`, {
+      await apiClient.post(`/api/comments/documents/${documentId}/comments`, {
         content: newComment,
       });
       
@@ -120,7 +120,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('대댓글 작성 시작:', documentId, parentId, replyContent);
-      await apiClient.post(`/comments/comments/${parentId}/replies`, {
+      await apiClient.post(`/api/comments/comments/${parentId}/replies`, {
         content: replyContent,
       });
       
@@ -160,7 +160,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 수정 시작:', commentId, editContent);
-      await apiClient.put(`/comments/comments/${commentId}`, {
+      await apiClient.put(`/api/comments/comments/${commentId}`, {
         content: editContent,
       });
       
@@ -191,7 +191,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 삭제 시작:', commentId);
-      await apiClient.delete(`/comments/comments/${commentId}`);
+      await apiClient.delete(`/api/comments/comments/${commentId}`);
       await loadComments();
       
       toast({
@@ -271,13 +271,13 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
           <div className="flex gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={comment.user_avatar} />
-              <AvatarFallback>{comment.user_name?.[0] || 'U'}</AvatarFallback>
+              <AvatarFallback>{comment.username?.[0] || 'U'}</AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <span className="font-semibold text-sm">{comment.user_name || '익명'}</span>
+                  <span className="font-semibold text-sm">{comment.username || '익명'}</span>
                   <span className="text-xs text-gray-500 ml-2">
                     {formatDate(comment.created_at)}
                     {comment.updated_at !== comment.created_at && ' (수정됨)'}

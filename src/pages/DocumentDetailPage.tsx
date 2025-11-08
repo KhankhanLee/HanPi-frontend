@@ -226,6 +226,15 @@ export function DocumentDetailPage() {
     navigate(`/edit/${id}`);
   };
 
+  const handleGoBack = () => {
+    // 이전 페이지가 있으면 뒤로가기, 없으면 홈으로
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate('/');
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm('정말 이 문서를 삭제하시겠습니까?')) return;
 
@@ -353,7 +362,7 @@ export function DocumentDetailPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <p className="text-lg text-gray-500 mb-4">문서를 찾을 수 없습니다.</p>
-            <Button onClick={() => navigate(-1)}>
+            <Button onClick={handleGoBack}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               뒤로 가기
             </Button>
@@ -373,7 +382,7 @@ export function DocumentDetailPage() {
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => navigate(-1)}
+        onClick={handleGoBack}
         className="mb-4"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
