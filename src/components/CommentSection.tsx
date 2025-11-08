@@ -40,7 +40,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadComments = async () => {
     try {
       console.log('댓글 로드 시작:', documentId);
-      const response = await apiClient.get(`/api/documents/${documentId}/comments`);
+      const response = await apiClient.get(`/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       setComments(data);
@@ -58,7 +58,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadReplies = async (commentId: number) => {
     try {
       console.log('대댓글 로드 시작:', commentId);
-      const response = await apiClient.get(`/api/comments/${commentId}/replies`);
+      const response = await apiClient.get(`/comments/${commentId}/replies`);
       console.log('대댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       
