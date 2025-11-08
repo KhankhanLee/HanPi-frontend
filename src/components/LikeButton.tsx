@@ -58,7 +58,7 @@ export function LikeButton({
 
     setLoading(true);
     try {
-      const response = await apiClient.post('/likes/toggle', {
+      const response = await apiClient.post('/toggle', {
         targetType,
         targetId,
       });

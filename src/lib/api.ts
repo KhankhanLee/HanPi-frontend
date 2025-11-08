@@ -14,24 +14,76 @@ export const apiClient = axios.create({
 // 요청 인터셉터 - 토큰 자동 추가
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('pi_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // PiContext에서 저장한 사용자 정보에서 토큰 가져오기
+    const userDataStr = localStorage.getItem('pi_user');
+    if (userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        if (userData.accessToken) {
+          config.headers.Authorization = `Bearer ${userData.accessToken}`;
+        }
+      } catch (error) {
+        console.error('사용자 토큰 파싱 실패:', error);
+      }
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// 응답 인터셉터 - 에러 처리
+// 응답 인터셉터 - 에러 처리 및 토큰 갱신
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // 토큰 만료 시 로그만 남기고 에러 전파
-      console.warn('인증 토큰이 없거나 만료되었습니다. Pi 로그인이 필요합니다.');
-      localStorage.removeItem('pi_token');
-      // 리다이렉트 제거 - 프론트엔드에서 에러 처리하도록
+      console.warn('인증 토큰이 없거나 만료되었습니다.');
+      
+      // JWT 토큰 만료 시 자동 갱신 시도
+      const userDataStr = localStorage.getItem('pi_user');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          
+          // Pi SDK가 있고 프로덕션 환경인 경우 토큰 갱신 시도
+          if (window.Pi && !import.meta.env.DEV) {
+            console.log('토큰 갱신 시도 중...');
+            try {
+              const piUser = await window.Pi.authenticate(
+                ['username', 'payments', 'wallet_address'],
+                () => {}
+              );
+              
+              // 백엔드에 새 토큰으로 로그인
+              const response = await apiClient.post('/auth/pi-login', {
+                accessToken: piUser.accessToken || '',
+                uid: piUser.uid,
+                username: piUser.username
+              });
+              
+              if (response.data?.success && response.data.token) {
+                // 새 토큰으로 업데이트
+                const newUserData = {
+                  ...userData,
+                  accessToken: response.data.token
+                };
+                localStorage.setItem('pi_user', JSON.stringify(newUserData));
+                
+                // 원래 요청을 새 토큰으로 재시도
+                error.config.headers.Authorization = `Bearer ${response.data.token}`;
+                return apiClient.request(error.config);
+              }
+            } catch (refreshError) {
+              console.error('토큰 갱신 실패:', refreshError);
+            }
+          }
+          
+          // 토큰 갱신 실패 시 로그아웃
+          localStorage.removeItem('pi_user');
+          delete apiClient.defaults.headers.common['Authorization'];
+        } catch (parseError) {
+          console.error('사용자 데이터 파싱 실패:', parseError);
+        }
+      }
     }
     return Promise.reject(error);
   }
