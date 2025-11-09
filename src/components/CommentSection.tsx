@@ -417,7 +417,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     );
   };
 
-  const topLevelComments = comments.filter(c => c.parent_id === null);
+  const topLevelComments = comments.filter(c => !c.parent_id);
 
   return (
     <div className="space-y-6">
@@ -450,7 +450,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
               {renderComment(comment, false)}
               {expandedReplies.has(comment.id) &&
                 comments
-                  .filter(c => c.parent_id === comment.id)
+                  .filter(c => c.parent_id && c.parent_id === comment.id)
                   .map(reply => renderComment(reply, true))}
             </React.Fragment>
           ))
