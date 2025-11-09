@@ -280,7 +280,8 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
 
     const isEditing = editingComment === comment.id;
     const isReplying = replyingTo === comment.id;
-    const isOwner = currentUserId === comment.user_id;
+    // Pi 사용자 ID와 댓글 작성자 ID 비교
+    const isOwner = piUser?.uid === comment.user_id;
 
     return (
       <Card key={comment.id} className={`mb-4 ${isReply ? 'ml-12 border-l-2' : ''}`}>
@@ -299,6 +300,10 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
                     {formatDate(comment.created_at)}
                     {comment.updated_at !== comment.created_at && ' (수정됨)'}
                   </span>
+                  {/* 디버깅용 - 나중에 제거 */}
+                  <div className="text-xs text-red-500">
+                    댓글 작성자: {comment.user_id} | 현재 사용자: {piUser?.uid} | 소유권: {isOwner ? 'YES' : 'NO'}
+                  </div>
                 </div>
                 
                 {isOwner && !isEditing && (
