@@ -37,6 +37,32 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user: piUser } = usePi();
+  
+  // JWT 토큰에서 사용자 정보 가져오기
+  const getCurrentUserId = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('토큰이 없습니다');
+      return null;
+    }
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('JWT payload:', payload);
+      console.log('piId from token:', payload.piId);
+      console.log('uid from token:', payload.uid);
+      return payload.piId;
+    } catch (error) {
+      console.error('토큰 파싱 오류:', error);
+      return null;
+    }
+  };
+
+  console.log('CommentSection 렌더링 시 사용자 정보:', {
+    piUser,
+    currentUserId: getCurrentUserId(),
+    token: localStorage.getItem('token') ? '존재' : '없음'
+  });
 
   // 댓글 목록 로드
   const loadComments = async () => {
@@ -280,8 +306,8 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
 
     const isEditing = editingComment === comment.id;
     const isReplying = replyingTo === comment.id;
-    // Pi 사용자 ID와 댓글 작성자 ID 비교 - uid 또는 piId 둘 다 시도
-    const isOwner = piUser?.uid === comment.user_id;
+    // JWT 토큰의 사용자 ID와 댓글 작성자 ID 비교
+    const isOwner = getCurrentUserId() === comment.user_id;
 
     return (
       <Card key={comment.id} className={`mb-4 ${isReply ? 'ml-12 border-l-2' : ''}`}>
@@ -302,7 +328,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
                   </span>
                   {/* 디버깅용 - 나중에 제거 */}
                   <div className="text-xs text-red-500">
-                    댓글 작성자: {comment.user_id} | Pi User UID: {piUser?.uid} | Pi User 전체: {JSON.stringify(piUser)} | 소유권: {isOwner ? 'YES' : 'NO'}
+                    댓글 작성자: {comment.user_id} | JWT 토큰 ID: {getCurrentUserId()} | Pi User: {JSON.stringify(piUser)} | 소유권: {isOwner ? 'YES' : 'NO'}
                   </div>
                 </div>
                 
