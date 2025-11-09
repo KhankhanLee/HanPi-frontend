@@ -42,7 +42,18 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       console.log('댓글 로드 시작:', documentId);
       const response = await apiClient.get(`/comments/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
-      const data = Array.isArray(response.data) ? response.data : response.data.data || [];
+      
+      // API 응답 구조 확인 후 데이터 추출
+      let data = [];
+      if (response.data.success && response.data.data) {
+        data = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        data = response.data;
+      } else if (response.data.data && Array.isArray(response.data.data)) {
+        data = response.data.data;
+      }
+      
+      console.log('처리된 댓글 데이터:', data);
       setComments(data);
     } catch (error) {
       console.error('댓글 로드 실패:', error);
@@ -90,11 +101,14 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 작성 시작:', documentId, newComment);
-      await apiClient.post(`/comments/documents/${documentId}/comments`, {
+      const response = await apiClient.post(`/comments/documents/${documentId}/comments`, {
         content: newComment,
       });
+      console.log('댓글 작성 응답:', response.data);
       
       setNewComment('');
+      
+      // 댓글 목록 새로고침
       await loadComments();
       
       toast({
