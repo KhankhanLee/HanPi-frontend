@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Card, CardContent, CardFooter } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
+import { usePi } from '@/contexts/PiContext';
 
 interface Comment {
   id: number;
@@ -34,18 +35,15 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const [editContent, setEditContent] = useState('');
   const [expandedReplies, setExpandedReplies] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const { toast } = useToast();
+  const { user: piUser } = usePi();
 
   // 댓글 목록 로드
   const loadComments = async () => {
-    setDebugInfo(prev => [...prev, 'loadComments 함수 진입!']);
     try {
-      setDebugInfo(prev => [...prev, 'loadComments 시작']);
       console.log('댓글 로드 시작:', documentId);
       const response = await apiClient.get(`/comments/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
-      setDebugInfo(prev => [...prev, `API 응답 받음: ${JSON.stringify(response.data).substring(0, 50)}...`]);
       
       // API 응답 구조 확인 후 데이터 추출
       let data = [];
@@ -59,10 +57,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       
       console.log('처리된 댓글 데이터:', data);
       setComments(data);
-      
-      setDebugInfo(prev => [...prev, `댓글 로드 완료: ${data.length}개`]);
     } catch (error) {
-      setDebugInfo(prev => [...prev, 'loadComments 오류 발생: ' + String(error)]);
       console.error('댓글 로드 실패:', error);
       toast({
         title: '오류',
@@ -108,20 +103,16 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 작성 시작:', documentId, newComment);
-      setDebugInfo(prev => [...prev, '댓글 작성 시도 중...']);
       
       const response = await apiClient.post(`/comments/documents/${documentId}/comments`, {
         content: newComment,
       });
       console.log('댓글 작성 응답:', response.data);
-      setDebugInfo(prev => [...prev, '댓글 작성 성공! 이제 새로고침 중...']);
       
       setNewComment('');
       
-      setDebugInfo(prev => [...prev, 'loadComments 호출 전']);
       // 댓글 목록 새로고침
       await loadComments();
-      setDebugInfo(prev => [...prev, 'loadComments 호출 후']);
       
       toast({
         title: '성공',
@@ -433,21 +424,6 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
 
   return (
     <div className="space-y-6">
-      {/* 긴급 디버깅 - 무조건 보이도록 */}
-      <div style={{
-        backgroundColor: 'red',
-        color: 'white',
-        padding: '20px',
-        border: '3px solid black',
-        fontSize: '16px',
-        fontWeight: 'bold'
-      }}>
-        디버깅 정보<br/>
-        댓글 수: {comments.length} / 최상위: {topLevelComments.length}<br/>
-        Document ID: {documentId}<br/>
-        로그 수: {debugInfo.length}
-      </div>
-      
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="h-5 w-5" />
         <h3 className="text-lg font-semibold">댓글 {topLevelComments.length}개</h3>
