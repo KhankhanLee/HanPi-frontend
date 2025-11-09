@@ -34,16 +34,18 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const [editContent, setEditContent] = useState('');
   const [expandedReplies, setExpandedReplies] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
   const { toast } = useToast();
 
   // 댓글 목록 로드
   const loadComments = async () => {
+    setDebugInfo(prev => [...prev, 'loadComments 함수 진입!']);
     try {
-      alert('loadComments 시작');
+      setDebugInfo(prev => [...prev, 'loadComments 시작']);
       console.log('댓글 로드 시작:', documentId);
       const response = await apiClient.get(`/comments/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
-      alert(`API 응답 받음: ${JSON.stringify(response.data).substring(0, 100)}`);
+      setDebugInfo(prev => [...prev, `API 응답 받음: ${JSON.stringify(response.data).substring(0, 50)}...`]);
       
       // API 응답 구조 확인 후 데이터 추출
       let data = [];
@@ -58,10 +60,9 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       console.log('처리된 댓글 데이터:', data);
       setComments(data);
       
-      // 디버깅을 위해 임시로 alert 추가
-      alert(`댓글 로드 완료: ${data.length}개`);
+      setDebugInfo(prev => [...prev, `댓글 로드 완료: ${data.length}개`]);
     } catch (error) {
-      alert('loadComments 오류 발생: ' + String(error));
+      setDebugInfo(prev => [...prev, 'loadComments 오류 발생: ' + String(error)]);
       console.error('댓글 로드 실패:', error);
       toast({
         title: '오류',
@@ -107,18 +108,20 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 작성 시작:', documentId, newComment);
-      alert('댓글 작성 시도 중...');
+      setDebugInfo(prev => [...prev, '댓글 작성 시도 중...']);
       
       const response = await apiClient.post(`/comments/documents/${documentId}/comments`, {
         content: newComment,
       });
       console.log('댓글 작성 응답:', response.data);
-      alert('댓글 작성 성공! 이제 새로고침 중...');
+      setDebugInfo(prev => [...prev, '댓글 작성 성공! 이제 새로고침 중...']);
       
       setNewComment('');
       
+      setDebugInfo(prev => [...prev, 'loadComments 호출 전']);
       // 댓글 목록 새로고침
       await loadComments();
+      setDebugInfo(prev => [...prev, 'loadComments 호출 후']);
       
       toast({
         title: '성공',
@@ -436,11 +439,17 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       </div>
       
       {/* 디버깅 정보 */}
-      <div className="bg-yellow-100 p-2 text-xs rounded">
+      <div className="bg-yellow-100 p-2 text-xs rounded mb-4">
         <div>전체 댓글: {comments.length}개</div>
         <div>최상위 댓글: {topLevelComments.length}개</div>
         <div>Document ID: {documentId}</div>
         <div>로딩 상태: {loading ? 'true' : 'false'}</div>
+        <div className="mt-2 max-h-32 overflow-y-auto">
+          <div className="font-bold">실행 로그:</div>
+          {debugInfo.map((info, index) => (
+            <div key={index}>#{index + 1}: {info}</div>
+          ))}
+        </div>
       </div>
       
       {/* 새 댓글 작성 */}
