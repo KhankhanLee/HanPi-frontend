@@ -40,7 +40,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadComments = async () => {
     try {
       console.log('댓글 로드 시작:', documentId);
-      const response = await apiClient.get(`/api/comments/documents/${documentId}/comments`);
+      const response = await apiClient.get(`/comments/documents/${documentId}/comments`);
       console.log('댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       setComments(data);
@@ -58,7 +58,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
   const loadReplies = async (commentId: number) => {
     try {
       console.log('대댓글 로드 시작:', commentId);
-      const response = await apiClient.get(`/api/comments/comments/${commentId}/replies`);
+      const response = await apiClient.get(`/comments/comments/${commentId}/replies`);
       console.log('대댓글 API 응답:', response.data);
       const data = Array.isArray(response.data) ? response.data : response.data.data || [];
       
@@ -90,7 +90,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 작성 시작:', documentId, newComment);
-      await apiClient.post(`/api/comments/documents/${documentId}/comments`, {
+      await apiClient.post(`/comments/documents/${documentId}/comments`, {
         content: newComment,
       });
       
@@ -120,7 +120,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('대댓글 작성 시작:', documentId, parentId, replyContent);
-      await apiClient.post(`/api/comments/comments/${parentId}/replies`, {
+      await apiClient.post(`/comments/comments/${parentId}/replies`, {
         content: replyContent,
       });
       
@@ -160,7 +160,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 수정 시작:', commentId, editContent);
-      await apiClient.put(`/api/comments/comments/${commentId}`, {
+      await apiClient.put(`/comments/comments/${commentId}`, {
         content: editContent,
       });
       
@@ -191,7 +191,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     setLoading(true);
     try {
       console.log('댓글 삭제 시작:', commentId);
-      await apiClient.delete(`/api/comments/comments/${commentId}`);
+      await apiClient.delete(`/comments/comments/${commentId}`);
       await loadComments();
       
       toast({
