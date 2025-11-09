@@ -55,6 +55,9 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       
       console.log('처리된 댓글 데이터:', data);
       setComments(data);
+      
+      // 디버깅을 위해 임시로 alert 추가
+      alert(`댓글 로드 완료: ${data.length}개`);
     } catch (error) {
       console.error('댓글 로드 실패:', error);
       toast({
@@ -426,6 +429,14 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
         <h3 className="text-lg font-semibold">댓글 {topLevelComments.length}개</h3>
       </div>
       
+      {/* 디버깅 정보 */}
+      <div className="bg-yellow-100 p-2 text-xs rounded">
+        <div>전체 댓글: {comments.length}개</div>
+        <div>최상위 댓글: {topLevelComments.length}개</div>
+        <div>Document ID: {documentId}</div>
+        <div>로딩 상태: {loading ? 'true' : 'false'}</div>
+      </div>
+      
       {/* 새 댓글 작성 */}
       <form onSubmit={handleSubmitComment} className="space-y-3">
         <Textarea
@@ -443,7 +454,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
       {/* 댓글 목록 */}
       <div className="space-y-4">
         {topLevelComments.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">첫 댓글을 작성해보세요!</p>
+          <p className="text-center text-gray-500 py-8">첫 댓글을 작성해보세요!(write first comment!)</p>
         ) : (
           topLevelComments.map(comment => (
             <React.Fragment key={comment.id}>
