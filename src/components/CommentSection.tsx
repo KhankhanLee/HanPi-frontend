@@ -433,23 +433,24 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
 
   return (
     <div className="space-y-6">
+      {/* 긴급 디버깅 - 무조건 보이도록 */}
+      <div style={{
+        backgroundColor: 'red',
+        color: 'white',
+        padding: '20px',
+        border: '3px solid black',
+        fontSize: '16px',
+        fontWeight: 'bold'
+      }}>
+        디버깅 정보<br/>
+        댓글 수: {comments.length} / 최상위: {topLevelComments.length}<br/>
+        Document ID: {documentId}<br/>
+        로그 수: {debugInfo.length}
+      </div>
+      
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="h-5 w-5" />
         <h3 className="text-lg font-semibold">댓글 {topLevelComments.length}개</h3>
-      </div>
-      
-      {/* 디버깅 정보 */}
-      <div className="bg-yellow-100 p-2 text-xs rounded mb-4">
-        <div>전체 댓글: {comments.length}개</div>
-        <div>최상위 댓글: {topLevelComments.length}개</div>
-        <div>Document ID: {documentId}</div>
-        <div>로딩 상태: {loading ? 'true' : 'false'}</div>
-        <div className="mt-2 max-h-32 overflow-y-auto">
-          <div className="font-bold">실행 로그:</div>
-          {debugInfo.map((info, index) => (
-            <div key={index}>#{index + 1}: {info}</div>
-          ))}
-        </div>
       </div>
       
       {/* 새 댓글 작성 */}
