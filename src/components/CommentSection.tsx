@@ -12,8 +12,8 @@ interface Comment {
   id: number;
   content: string;
   user_id: string;
-  username: string; 
-  user_avatar?: string;
+  author_name: string; 
+  author_avatar?: string;
   created_at: string;
   updated_at: string;
   parent_id: number | null;
@@ -287,14 +287,14 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
         <CardContent className="pt-4">
           <div className="flex gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={comment.user_avatar} />
-              <AvatarFallback>{comment.username?.[0] || 'U'}</AvatarFallback>
+              <AvatarImage src={comment.author_avatar} />
+              <AvatarFallback>{comment.author_name?.[0] || 'U'}</AvatarFallback>
             </Avatar>
             
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <span className="font-semibold text-sm">{comment.username || '익명'}</span>
+                  <span className="font-semibold text-sm">{comment.author_name || '익명'}</span>
                   <span className="text-xs text-gray-500 ml-2">
                     {formatDate(comment.created_at)}
                     {comment.updated_at !== comment.created_at && ' (수정됨)'}
