@@ -1,7 +1,7 @@
 
 # HanPi - Pi Network 문서 공유 플랫폼 (Frontend)
 
-> A revolutionary document sharing platform built on the Pi Network ecosystem
+> A document sharing platform built on the Pi Network ecosystem
 
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black)](https://vercel.com)
 [![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org)
@@ -11,6 +11,7 @@
 ## 🌟 개요
 
 HanPi는 Pi Network 생태계를 기반으로 한 혁신적인 문서 공유 플랫폼의 프론트엔드 애플리케이션입니다. 사용자들은 Pi 코인을 사용하여 프리미엄 콘텐츠를 구매하고, 자신만의 지식을 공유할 수 있습니다.
+HanPi is the front-end application for an innovative document sharing platform built on the Pi Network ecosystem. Users can use Pi Coins to purchase premium content and share their knowledge.
 
 ## ✨ 주요 기능
 
@@ -42,6 +43,9 @@ HanPi는 Pi Network 생태계를 기반으로 한 혁신적인 문서 공유 플
 - **다크/라이트 테마**
 - **다국어 지원** (한국어/영어)
 - **접근성** 준수
+
+## 영상(video)
+https://youtube.com/shorts/5AdCBXG3wXE
 
 ## 🚀 빠른 시작
 
