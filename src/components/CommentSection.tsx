@@ -307,7 +307,19 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
     const isEditing = editingComment === comment.id;
     const isReplying = replyingTo === comment.id;
     // JWT 토큰의 사용자 ID와 댓글 작성자 ID 비교
-    const isOwner = getCurrentUserId() === comment.user_id;
+    const currentUserId = getCurrentUserId();
+    const commentUserId = comment.user_id;
+    const isOwner = currentUserId === commentUserId;
+    
+    console.log(`댓글 ${comment.id} 소유권 확인:`, {
+      currentUserId,
+      commentUserId,
+      isEqual: currentUserId === commentUserId,
+      currentUserIdType: typeof currentUserId,
+      commentUserIdType: typeof commentUserId,
+      currentUserIdLength: currentUserId ? currentUserId.length : 'null',
+      commentUserIdLength: commentUserId ? commentUserId.length : 'null'
+    });
 
     return (
       <Card key={comment.id} className={`mb-4 ${isReply ? 'ml-12 border-l-2' : ''}`}>
@@ -328,7 +340,7 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
                   </span>
                   {/* 디버깅용 - 나중에 제거 */}
                   <div className="text-xs text-red-500">
-                    댓글 작성자: {comment.user_id} | JWT 토큰 ID: {getCurrentUserId()} | Pi User: {JSON.stringify(piUser)} | 소유권: {isOwner ? 'YES' : 'NO'}
+                    댓글 작성자: {commentUserId} (타입: {typeof commentUserId}) | JWT 토큰 ID: {currentUserId} (타입: {typeof currentUserId}) | 소유권: {isOwner ? 'YES' : 'NO'}
                   </div>
                 </div>
                 
