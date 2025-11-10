@@ -338,10 +338,6 @@ export function CommentSection({ documentId, currentUserId }: CommentSectionProp
                     {formatDate(comment.created_at)}
                     {comment.updated_at !== comment.created_at && ' (수정됨)'}
                   </span>
-                  {/* 디버깅용 - 나중에 제거 */}
-                  <div className="text-xs text-red-500">
-                    댓글 작성자: {commentUserId} (타입: {typeof commentUserId}) | JWT 토큰 ID: {currentUserId} (타입: {typeof currentUserId}) | 소유권: {isOwner ? 'YES' : 'NO'}
-                  </div>
                 </div>
                 
                 {isOwner && !isEditing && (
