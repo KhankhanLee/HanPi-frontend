@@ -191,7 +191,7 @@ export const api = {
   // 문서 구매 관련
   checkPurchase: (documentId: string) => apiClient.get(`/purchases/check/${documentId}`),
   initiatePurchase: (documentId: string) => apiClient.post(`/purchases/${documentId}/initiate`),
-  approvePurchase: (documentId: string, paymentId: string) => apiClient.post(`/purchases/${documentId}/approve`, { paymentId }),
+  approvePurchase: (paymentId: string, documentId: string) => apiClient.post(`/purchases/${documentId}/approve`, { paymentId }),
   completePurchase: (documentId: string, paymentId: string, txid: string) => apiClient.post(`/purchases/${documentId}/complete`, { paymentId, txid }),
   getMyPurchases: () => apiClient.get('/purchases/my'),
   
